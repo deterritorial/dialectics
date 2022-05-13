@@ -1,3 +1,14 @@
+#print(__file__,'imported')
+import os,sys
+from pathlib import Path
+PATH_USER_HOME = str(Path.home())
+PATH_HOME = os.path.join(PATH_USER_HOME,'intertxt')
+PATH_DATA = os.path.join(PATH_HOME,'data')
+PATH_CONFIG = os.path.join(PATH_HOME,'config')
+PATH_CORPORA = os.path.join(PATH_HOME,'corpora')
+TO_SCREEN = True
+TO_FILE = True
+
 SERVERS=[
     'http://128.232.229.63:8529'
 ]
@@ -8,29 +19,54 @@ IDSEP_START='_'
 IDSEP='/'
 IDSEP_DB='__'
 
+INIT_DB_WITH_CORPORA = {
+	# 'bpo',
+	'chadwyck',
+	'chicago',
+	'markmark',
+	'txtlab',
+	'tedjdh',
+	'gildedage',
+	# 'canon_fiction',
+	'clmet',
+	'dta',
+	'dialnarr',
+	'estc',
+	'eebo_tcp',
+	'ecco_tcp',
+	'ecco',
+	'evans_tcp',
+	'litlab',
+	# 'ravengarside',
+	'semantic_cohort',
+	'spectator'
+}
 
-import os,sys,random
+
+
+
+### stdlib
+import tempfile
+from zipfile import BadZipFile
+import shutil
+import tempfile,sys,shutil,os,random
+
+
+## external
+import pandas as pd
+import numpy as np
+import humanize
+
+
+
+## me
 from .logs import *
-
-
-from .utils import *
-
-log = Log(
-	to_screen=True,
-	to_file=False,
-	# fn=PATH_LLTK_LOG_FN,
-	force=True,
-	# verbose=LOG_VERBOSE_JUPYTER if in_jupyter() else LOG_VERBOSE_TERMINAL
-)
-log.info('booting')
-
-
-from .models import *
-from .database import *
-from .text import *
-from .corpus import *
-from .rels import *
-from .database import _ADB_ as db,_ADB_CLIENT as client,_ADB_SYSDB as sysdb
-
-
-log.info('ready')
+with Log('booting'):
+	from .utils import *
+	from .models import *
+	from .database import *
+	from .text import *
+	from .textlist import *
+	from .corpus import *
+	from .rels import *
+	from .database import _ADB_ as db,_ADB_CLIENT as client,_ADB_SYSDB as sysdb

@@ -1,16 +1,21 @@
+#print(__file__,'imported')
 from .imports import *
 from loguru import logger
+import time
 LOGGER=None
 HIDDEN_NOW=False
 
 class Logger():
-    def __init__(self,
-            to_screen=True,
-            to_file=True,
+    def __init__(
+            self,
+            init_msg='',
+            to_screen=TO_SCREEN,
+            to_file=TO_FILE,
             fn=None,
             verbose=1,
             start=True,
-            format="""[{time:HH:mm:ss.SSS}] {name}.<level>{function}</level>( <cyan>{message}</cyan> )""",
+            # format="""[{time:HH:mm:ss.SSS}] {name}.<level>{function}</level>( <cyan>{message}</cyan> )""",
+            format="""[{time:HH:mm:ss.SSS}] <level>{message}</level>""",
             fn_clear=True,
             fn_rotation="50MB",
             ):
@@ -25,7 +30,8 @@ class Logger():
         self.fn_clear=fn_clear
         self.fn_rotation=fn_rotation
         self.fn=fn
-
+        self.now=time.time()
+        self.init_msg=init_msg.strip()
         self.verbose = verbose # general verbosity!
 
         # clear
@@ -33,6 +39,10 @@ class Logger():
 
         # start?
         if start: self.start()
+
+        # init?
+        
+        if self.init_msg: self(f'{self.init_msg}')
 
     
 
@@ -47,9 +57,24 @@ class Logger():
 
     def set_verbose(self,verbose=1): self.verbose=1
 
+    __call__ = logger.debug
+
     def __enter__(self):
+        __call__ = self.logger.debug
+        self.now=time.time()
         self.start_screen()
+        return self
+
     def __exit__(self,*x): 
+        delta=time.time()-self.now
+        deltastr=humanize.precisedelta(delta,minimum_unit='microseconds',format="%0.4f")
+        deltastr=deltastr.replace("microseconds","μs")
+        deltastr=deltastr.replace("milliseconds","ms")
+        deltastr=deltastr.replace("nanoseconds","ms")
+        #if deltastr.startswith('0 '): deltastr='<1 '+deltastr[2:-1]
+        msg=''
+        if self.init_msg: msg+=' ' + self.init_msg[0].lower() + self.init_msg[1:]
+        self(f'Completed{msg} (+{deltastr})')# in {deltastr}')
         if not self.to_screen: self.stop_screen()
     
     def start(self):
@@ -106,7 +131,7 @@ class Logger():
     def __getattr__(self,name):
         from .utils import getattribute
         res = getattribute(self,name)
-        if res is None: res = getattribute(logger,name)
+        if res is None: res = getattribute(self.logger,name)
         return res
 
     def hidden(self,verbose=0):
@@ -152,14 +177,20 @@ class Logger():
     #     self.verbose=verbose
     #     if self.verbose>1: self('showing log')
     
-    __call__ = logger.debug
+    @property
+    def logger(self):
+        from loguru import logger as lgr
+        return lgr
 
 
-def Log(force=False,**kwargs):
-    global LOGGER
-    if force or LOGGER is None:
-        LOGGER = Logger(**kwargs)
-    return LOGGER
+Log=Logger
+
+
+# def Log(force=False,**kwargs):
+#     global LOGGER
+#     if force or LOGGER is None:
+#         LOGGER = Logger(**kwargs)
+#     return LOGGER
 
 class log_hidden():
     def __init__(self,verbose=None,log=None):
@@ -170,6 +201,7 @@ class log_hidden():
             self.log.verbose_was=self.log.verbose
             self.log.verbose=self.verbose
         self.log.stop_screen()
+        return self
     def __exit__(self,*x):
         if self.verbose is not None:
             self.log.verbose=self.log.verbose_was
@@ -184,6 +216,7 @@ class log_shown():
         self.log.verbose_was=self.log.verbose
         self.log.verbose=self.verbose
         self.log.start_screen()
+        return self
     def __exit__(self,*x):
         self.log.verbose=self.log.verbose_was
         self.log.verbose_was=self.verbose

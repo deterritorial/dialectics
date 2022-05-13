@@ -1,13 +1,23 @@
+#print(__file__,'imported')
 from .imports import *
 from .database import get_collection
+log = Log()
+
+
 
 TEXT_CACHE={}
 TMP_CORPUS='tmp'
 
 
 
-def Text(_id=None,_corpus=None,**kwargs):
-    return BaseText(_id,_corpus,**kwargs)
+def Text(_id=None,_corpus=None,_load=True,_force=False,**kwargs):
+    global TEXT_CACHE
+
+    if not _force and _id in TEXT_CACHE:
+        return TEXT_CACHE[_id]
+
+    t=BaseText(_id,_corpus,**kwargs)
+    return t.init() if _load else t
 
 
 
@@ -15,39 +25,51 @@ def Text(_id=None,_corpus=None,**kwargs):
 class BaseText(BaseObject):
     __COLLECTION__='text'
 
-    def __init__(self,_id,_corpus=None,**kwargs):
-        if type(_id)==str and _id and not IDSEP in _id and IDSEP_DB in _id:
-            _id=_id.replace(IDSEP_DB,IDSEP)
+    def __init__(self,_id=None,_corpus=None,**kwargs):
+        # random if no id given
         if not _id: _id=get_idx()
+
+        # if just id, then use corpus
         if not is_textish(_id):
             if not _corpus: _corpus=TMP_CORPUS
             _id = to_addr(_corpus,_id)
-                
-        if not is_textish(_id):
-            raise Exception(f"Cannot get an ID? {_id}")    
+        else:
+            # make sure is our format
+            if is_db_addr(_id): _id=_id.replace(IDSEP_DB,IDSEP)
+
+        # still busted?         
+        if not is_textish(_id): raise Exception(f"Cannot get an ID? {_id}")    
         assert is_textish(_id)
-        
+
+        # set vals        
         self._id=_id                       # text 'addr'
         self._corpus=addr_to_corpus(_id)   # corpus id
         self.id=addr_to_id(_id)            # text id
         self._data=kwargs                  # all metadata
 
+    def __repr__(self):
+        return f"Text('{self._id}')"
+
 
     @property
     def _meta(self):
         return self.ensure_id(just_meta(self._data))
+    meta=_meta
+    data=_meta
     @property
-    def _params(self):
-        return self.ensure_id(just_params(self._data))
+    def _params(self): return self.ensure_id(just_params(self._data))
     @property
-    def data(self): return self._meta
+    def addr(self): return self._id
     
     
 
     def ensure_id(self,d={},idkey='_id',**kwargs):
-        print([d,idkey])
-        id=getattr(self,idkey)
-        return merge_dict({idkey:id}, just_meta(merge_dict(self._data, d, kwargs)))
+        return merge_dict(
+            {
+                idkey:getattr(self,idkey),
+                '_corpus':self._corpus,
+            },
+            just_meta(merge_dict(self._data, d, kwargs)))
 
     def ensure_id_db(self,d={},idkey='_key',**kwargs):
         return self.ensure_id(d=d,idkey=idkey,**kwargs)
@@ -58,9 +80,23 @@ class BaseText(BaseObject):
     coll=collection
     
     ## database funcs
-    def load(self):
-        data = self.collection.get(self._key)
-        if data: self._data={**self._data,**just_meta(data)}
+    def load(self,force=False):
+        if force or not self._loadd:
+            data = self.collection.get(self._key)
+            if data: self._data={**self._data,**just_meta(data)}
+            self._loadd=True
+
+    def update(self,**meta):
+        #meta1=self._meta
+        for k,v in just_meta(meta).items(): self._data[k]=v
+        #meta2=self._meta
+        # if meta1!=meta2:
+            # if log: log(f'updating db record for {self}')
+            # self.save()
+        
+    def init(self,force=False,**kwargs):
+        self.load(force=force,**kwargs)
+        return self
     
     def exists(self):
         return self._key in self.collection
@@ -76,13 +112,14 @@ class BaseText(BaseObject):
                 saved_meta = self.coll.insert(to_insert)
             except Exception as e:
                 if log: log.error(e)
-        if log: log(saved_meta)
+        if log>1: log(saved_meta)
         return saved_meta
         
     
         
 
     def save(self):
+        # with Log(f'Saving {self} in database')
         saved_meta=self.upsert()
         if not saved_meta: return
         assert saved_meta['_key'] == self._key

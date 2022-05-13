@@ -1,6 +1,11 @@
-from .imports import *
+#print(__file__,'imported')
+from .utils import *
 
 
+def gettimestamp():
+    from datetime import datetime
+    dt=datetime.now()
+    return f'{dt.hour:02}:{dt.minute:02}:{dt.second:02}.{dt.microsecond//1000}'
 
 
 def is_textish(obj):
@@ -10,12 +15,12 @@ def is_valid_text_obj(obj):
     return is_text_obj(obj) and obj.id_is_valid()
 
 def is_text_obj(obj):
-    from .text import BaseText
+    from intertxt.text import BaseText
     if issubclass(type(obj), BaseText): return True
     return False
 
 def is_corpus_obj(obj): 
-    from .corpus import BaseCorpus
+    from intertxt.corpus import BaseCorpus
     return issubclass(type(obj), BaseCorpus)
 
 
@@ -30,8 +35,13 @@ def to_addr(corp,text):
     if is_text_obj(text): text=text.id
     return f'_{corp}/{text}'
 
-def is_addr(idx):
+def is_addr(idx): return is_our_addr(idx) or is_db_addr(idx)
+
+def is_our_addr(idx):
     return type(idx)==str and idx and idx.startswith(IDSEP_START) and IDSEP in idx
+def is_db_addr(_id):
+    return type(_id)==str and _id and not IDSEP in _id and IDSEP_DB in _id
+
 
 def addr_to_corpus(addr):
     if addr.startswith(IDSEP_START) and IDSEP in addr:
@@ -50,7 +60,7 @@ def just_params(d):
     return od
 
 def just_meta(d):
-    od={k:v for k,v in dict(d).items() if k and k[0]!='_' and safebool(v)}
+    od={k:v for k,v in dict(d).items() if k and k[0]!='_'}
     return od
 
 
@@ -72,6 +82,7 @@ def getattribute(obj,name):
 
 
 def ensure_dir_exists(path,fn=None):
+    import os
     if not path: return ''
     try:
         if fn is None and os.path.splitext(path)!=path: fn=True
@@ -206,3 +217,57 @@ def is_iterable(v):
 
 
 
+
+def setup():
+    from intertxt import log,PATH_HOME,PATH_DATA,PATH_CONFIG,PATH_CORPORA
+    # create paths
+    for path in [PATH_HOME,PATH_DATA,PATH_CONFIG,PATH_CORPORA]:
+        if not os.path.exists(path):
+            try:
+                os.makedirs(path)
+            except Exception as e:
+                log.error(e)
+
+    log.info('ready')
+
+
+
+def get_func_str_parts(xstr_or_l):
+    if not xstr_or_l: return []
+    if type(xstr_or_l)==str:
+        l=xstr_or_l.split(',')
+    elif is_iterable(xstr_or_l):
+        l=xstr_or_l
+    else:
+        l=[]
+    l=[x.strip() for x in l if x.strip()]
+    return l 
+
+
+
+def hashstr(x):
+    import hashlib
+    return hashlib.sha224(str(x).encode('utf-8')).hexdigest()
+
+
+def in_jupyter(): return sys.argv[-1].endswith('json')
+
+def get_tqdm(*args,desc='',**kwargs):
+    if desc: desc=f'[{gettimestamp()}] {desc}'
+    if in_jupyter():
+        from tqdm.notebook import tqdm as tqdmx
+    else:
+        from tqdm import tqdm as tqdmx
+    return tqdmx(*args,desc=desc,**kwargs)
+
+
+
+
+
+
+def zeropunc(x,allowed={'_'}): return ''.join(y for y in x if y.isalpha() or y in allowed)
+
+
+def addr_to_key(addr):
+    # return zeropunc(addr.replace(IDSEP,IDSEP_DB),allowed='_')
+    return hashstr(addr)[:13]
