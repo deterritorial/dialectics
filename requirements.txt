@@ -4,4 +4,4 @@ tqdm
 humanize
 numpy
 loguru
-arango
+python-arango

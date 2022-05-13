@@ -21,9 +21,14 @@ def Text(_id=None,_corpus=None,_load=True,_force=False,**kwargs):
 
 
 
+from .database import find as dbfind
 
 class BaseText(BaseObject):
     __COLLECTION__='text'
+
+    find = dbfind
+
+
 
     def __init__(self,_id=None,_corpus=None,**kwargs):
         # random if no id given
