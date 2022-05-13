@@ -174,10 +174,14 @@ CORPORA_META={}
 def get_corpora_meta(force=False):
     global CORPORA_META
     if force or CORPORA_META is not None:
-        path=os.path.join(PATH_CORPORA,'metadata.csv')
-        df=pd.read_csv(path).fillna('')
-        dd=dict((d['id'],d) for d in df.to_dict('records'))
-        CORPORA_META=dd
+        try:
+            path=os.path.join(PATH_CORPORA,'metadata.csv')
+            df=pd.read_csv(path).fillna('')
+            dd=dict((d['id'],d) for d in df.to_dict('records'))
+            CORPORA_META=dd
+        except Exception as e:
+            Log().error(e)
+            return {}
         
     return CORPORA_META
 
