@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding='utf-8', errors='ignore') as fh:
 
 setup(
     name='intertxt',
-    version='0.0.2',
+    version='0.0.3',
     url='https://github.com/quadrismegistus/intertxt.git',
     author='Ryan Heuser',
     author_email='rj416@cam.ac.uk',
