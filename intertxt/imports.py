@@ -13,11 +13,13 @@ SERVERS=[
     'http://128.232.229.63:8529'
 ]
 COL_ID='id'
-COL_ADDR='_id'
+COL_ADDR='_addr'
 COL_CORPUS='_corpus'
 IDSEP_START='_'
 IDSEP='/'
-IDSEP_DB='__'
+IDSEP_DB=')('
+MATCHRELNAME='rdf:type'
+DEFAULT_COMPAREBY=dict(author=0.9, title=0.9, year=1.0)
 
 INIT_DB_WITH_CORPORA = {
 	# 'bpo',
@@ -42,6 +44,17 @@ INIT_DB_WITH_CORPORA = {
 	'spectator'
 }
 
+OK_META_KEYS={
+'_id',
+'_key',
+'_addr',
+'_corpus',
+'_au',
+'_ti',
+'_yr',
+'id',
+}
+
 
 
 
@@ -60,13 +73,11 @@ import humanize
 
 
 ## me
-from .logs import *
+from intertxt.utils.logs import *
 with Log('booting'):
-	from .utils import *
-	from .models import *
-	from .database import *
-	from .text import *
-	from .textlist import *
-	from .corpus import *
-	from .rels import *
-	from .database import _ADB_ as db,_ADB_CLIENT as client,_ADB_SYSDB as sysdb
+	from intertxt.utils import *
+	from intertxt.database import *
+	from intertxt.texts import *
+	from intertxt.corpora import *
+	from intertxt.models import *
+

@@ -1,5 +1,5 @@
-#print(__file__,'imported')
-from .imports import *
+##print(__file__,'imported')
+from intertxt.imports import *
 from loguru import logger
 import time
 LOGGER=None
@@ -13,6 +13,7 @@ class Logger():
             to_file=TO_FILE,
             fn=None,
             verbose=1,
+            v=1,
             start=True,
             # format="""[{time:HH:mm:ss.SSS}] {name}.<level>{function}</level>( <cyan>{message}</cyan> )""",
             format="""[{time:HH:mm:ss.SSS}] <level>{message}</level>""",
@@ -32,6 +33,8 @@ class Logger():
         self.fn=fn
         self.now=time.time()
         self.init_msg=init_msg.strip()
+        self.init_verbose=v # for initial message
+
         self.verbose = verbose # general verbosity!
 
         # clear
@@ -42,7 +45,8 @@ class Logger():
 
         # init?
         
-        if self.init_msg: self(f'{self.init_msg}')
+        if self.init_msg and self.verbose>=self.init_verbose:
+            self(f'{self.init_msg}')
 
     
 
@@ -66,15 +70,14 @@ class Logger():
         return self
 
     def __exit__(self,*x): 
-        delta=time.time()-self.now
-        deltastr=humanize.precisedelta(delta,minimum_unit='microseconds',format="%0.4f")
-        deltastr=deltastr.replace("microseconds","μs")
-        deltastr=deltastr.replace("milliseconds","ms")
-        deltastr=deltastr.replace("nanoseconds","ms")
-        #if deltastr.startswith('0 '): deltastr='<1 '+deltastr[2:-1]
-        msg=''
-        if self.init_msg: msg+=' ' + self.init_msg[0].lower() + self.init_msg[1:]
-        self(f'Completed{msg} (+{deltastr})')# in {deltastr}')
+        if self.verbose >= self.init_verbose:
+            delta=time.time()-self.now
+            deltastr=humanize.precisedelta(delta,minimum_unit='microseconds',format="%0.4f")
+            deltastr=deltastr.replace("microseconds","μs")
+            deltastr=deltastr.replace("milliseconds","ms")
+            deltastr=deltastr.replace("nanoseconds","ms")
+            msg=' ' + self.init_msg[0].lower() + self.init_msg[1:].split(':')[0] if self.init_msg else ''
+            if self.verbose>=self.init_verbose: self(f'Completed{msg} (+{deltastr})\n')# in {deltastr}')
         if not self.to_screen: self.stop_screen()
     
     def start(self):
@@ -110,7 +113,7 @@ class Logger():
 
     def start_file(self):
         if self.id_file is None and self.fn:
-            from .utils import ensure_dir_exists,backup_fn,rmfn
+            from intertxt.utils import ensure_dir_exists,backup_fn,rmfn
             ensure_dir_exists(self.fn)
             if os.path.exists(self.fn): backup_fn(self.fn)
             rmfn(self.fn)
@@ -129,7 +132,7 @@ class Logger():
                 # rmfn(self.fn)
 
     def __getattr__(self,name):
-        from .utils import getattribute
+        from intertxt.utils import getattribute
         res = getattribute(self,name)
         if res is None: res = getattribute(self.logger,name)
         return res

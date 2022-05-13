@@ -1,5 +1,7 @@
 #print(__file__,'imported')
 from .utils import *
+from .logs import Log
+from .misc import get_tqdm
 
 def writegen_jsonl(fnfn,generator,args=[],kwargs={}):
     import jsonlines

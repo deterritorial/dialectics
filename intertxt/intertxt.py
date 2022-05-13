@@ -1,2 +1,2 @@
 #print(__file__,'imported')
-from .imports import *
+from intertxt.imports import *

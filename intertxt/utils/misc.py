@@ -15,12 +15,12 @@ def is_valid_text_obj(obj):
     return is_text_obj(obj) and obj.id_is_valid()
 
 def is_text_obj(obj):
-    from intertxt.text import BaseText
+    from intertxt.texts import BaseText
     if issubclass(type(obj), BaseText): return True
     return False
 
 def is_corpus_obj(obj): 
-    from intertxt.corpus import BaseCorpus
+    from intertxt.corpora import BaseCorpus
     return issubclass(type(obj), BaseCorpus)
 
 
@@ -33,14 +33,17 @@ def to_params_meta(_params_or_meta,prefix_params='_'):
 def to_addr(corp,text): 
     if is_corpus_obj(text): corp=corp.id
     if is_text_obj(text): text=text.id
-    return f'_{corp}/{text}'
+    return f'{IDSEP_START}{corp}{IDSEP}{text}'
 
-def is_addr(idx): return is_our_addr(idx) or is_db_addr(idx)
+def is_addr(idx): return is_our_addr(idx)# or is_db_addr(idx)
+
+def to_corpus_and_id(idx):
+    if is_addr(idx):
+        return tuple(idx[len(IDSEP_START):].split(IDSEP,1))
+    return ('',idx)
 
 def is_our_addr(idx):
     return type(idx)==str and idx and idx.startswith(IDSEP_START) and IDSEP in idx
-def is_db_addr(_id):
-    return type(_id)==str and _id and not IDSEP in _id and IDSEP_DB in _id
 
 
 def addr_to_corpus(addr):
@@ -59,10 +62,15 @@ def just_params(d):
     od={k:('' if not v else v) for k,v in dict(d).items() if k and k[0]=='_'}
     return od
 
+
+
 def just_meta(d):
-    od={k:v for k,v in dict(d).items() if k and k[0]!='_'}
+    od={k:v for k,v in dict(d).items() if k and (k in OK_META_KEYS or k[0]!='_')}
     return od
 
+def just_meta_no_id(d):
+    od={k:v for k,v in dict(d).items() if k and k not in OK_META_KEYS and k[0]!='_'}
+    return od
 
 
 #### ADDRESS MANAGEMENT
@@ -265,9 +273,92 @@ def get_tqdm(*args,desc='',**kwargs):
 
 
 
-def zeropunc(x,allowed={'_'}): return ''.join(y for y in x if y.isalpha() or y in allowed)
+def zeropunc(x,allow={'_'}):
+    if not x: return ''
+    return ''.join([y for y in x if y.isalnum() or y in allow])
 
 
-def addr_to_key(addr):
-    # return zeropunc(addr.replace(IDSEP,IDSEP_DB),allowed='_')
-    return hashstr(addr)[:13]
+def addr_to_dbkey(addr):
+    h=hashstr(addr)
+    # return h[:7]
+    # return h[:2]+'-'+h[2:4]+'-'+h[4:7]
+    return h[:3]+'-'+h[3:7]
+
+
+
+
+
+
+def to_lastname(name):
+    if not name: return ''
+    name=name.strip()
+    if not name: return 'Unknown'
+    if ',' in name:
+        namel=[x.strip() for x in name.split(',') if x.strip()]
+        name=namel[0] if namel else name
+    else:
+        namel=[x.strip() for x in name.split() if x.strip()]
+        name=namel[-1] if namel else name
+
+    # random
+    if 'Q' in name:
+        ind=name.index('Q')
+        try:
+            ind2=name[ind+1]
+            if ind2.isdigit():
+                name=name[:ind]
+        except IndexError:
+            pass
+
+    return name
+
+
+def ensure_snake(xstr,lower=True,allow={'_'}):
+    if lower: xstr=xstr.lower()
+    xstr=xstr.strip().replace(' ','_')
+    o='_'.join(
+        zeropunc(x,allow=allow)
+        for x in xstr.split('_')
+    )
+    return o
+
+
+
+def to_shorttitle(title,
+            puncs=':;.([,!?',
+            ok={'Mrs','Mr','Dr'},
+            title_end_phrases={
+                'edited by','written by',
+                'a novel','a tale','a romance','a history','a story',
+                'a domestic tale',
+                'by the author','by a lady','being some','by Miss','by Mr',
+                'an historical','the autobiography',
+                'being',
+                ' by ',
+                ' or'
+            },
+            replacements={
+                ' s ':"'s ",
+            },
+            replacements_o={"'S ":"'s "}
+            ):
+
+        if not title: return ''
+        ti=title
+        ti=ti.strip().replace('—','--').replace('–','-')
+        ti=ti.title()
+        for x,y in replacements.items(): ti=ti.replace(x.title(),y)
+        if any(x in ti for x in puncs):
+            for x in puncs:
+                o2=ti.split(x)[0].strip()
+                if o2 in ok: continue
+                ti=o2
+        else:
+            l=list(title_end_phrases)
+            l.sort(key = lambda x: -len(x))
+            for x in l:
+                # log(x+' ?')
+                ti=ti.split(x.title())[0].strip()
+        o=ti.strip()
+        for x,y in replacements_o.items(): o=o.replace(x,y)
+        return o

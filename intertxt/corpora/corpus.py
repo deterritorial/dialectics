@@ -1,6 +1,6 @@
 #print(__file__,'imported')
-from .imports import *
-
+from intertxt.imports import *
+from intertxt.texts import BaseText
 
 CORPUS_CACHE={}
 def Corpus(id=TMP_CORPUS,_force=False,**kwargs):
@@ -13,8 +13,9 @@ def Corpus(id=TMP_CORPUS,_force=False,**kwargs):
 
 
 class BaseCorpus(TextList):
-    col_id='id'
-    col_addr='_id'
+    col_id=COL_ID
+    col_addr=COL_ADDR
+    text_class=BaseText
 
     def __init__(self,id=TMP_CORPUS,name=None,**kwargs):
         self.id=zeropunc(id).lower()
@@ -46,22 +47,26 @@ class BaseCorpus(TextList):
         }
 
 
-    def text(self,id=None,meta={},_load=None,_i=None,_force=False,**meta2):
+    def text(self,id=None,meta={},_load=None,_i=None,_force=False,_add=True,**meta2):
         d=merge_dict(meta,meta2)
         meta=just_meta(d)
+        
         # get id
         if not id: id=d.get(self.col_id)
-        if not id: id=get_idx(i=_i)        # already have it?
+        if not id: id=get_idx(i=_i)        
+        
+        # already have it?
         if not _force and id in self._textd: return self._textd[id]#.init(**meta)
+        
         # prob gonne have to make it
         if _load is None: _load = not d
-        t=Text(
+        t=self.text_class(
             id,             # text id within corpus
             self.id,        # id if corpus
             **meta,
             _load=_load
         )
-        self._textd[t.id]=t
+        if _add: self._textd[t.id]=t
         return t
 
     @property
@@ -87,7 +92,7 @@ class BaseCorpus(TextList):
                 yield self.text(_i=i, **d)
             
             if not i:
-                for d in self.init_from_files():
+                for d in self.init_from_file():
                     i+=1
                     yield self.text(i=i+1, **d)
             log(f'Initialized {i} texts')
@@ -125,41 +130,40 @@ class BaseCorpus(TextList):
                 for d in iterr:
                     if self.col_id in d and d[self.col_id]:
                             yield d
-        
 
-    def sync(self,batch_size=100,**kwargs):
+
+
+
+    def sync(self,**kwargs):
+        with Log(f'Syncing {self} into database') as log:
+            for i,d in enumerate(self.init_from_file()):
+                t=self.text(_i=i+1, _add=False, _load=False, _force=False, **d)
+                t.save()
+    
+
+
+
+    
+    def sync_batch(self,batch_size=100,**kwargs):
         with Log(f'Syncing {self} into database') as log:
             batch=[]
             coll=self.text_collection
-            for d in self.init_from_file():
-                id=d.get(self.col_id)
-                addr=to_addr(self.id,id)
-                odx={
-                    '_key':addr_to_key(addr),
-                    '_addr':addr,
-                    '_corpus':self.id,
-                    **just_meta(d)
-                }
-                batch.append(odx)
 
+            # what to do?
+            def do_batch(batch):
+                batch=[safejson(t.ensure_id()) for t in batch]
+                coll.import_bulk(batch)
+                return []
+
+
+            # make and run batches
+            for i,d in enumerate(self.init_from_file()):
+                t=self.text(_i=i+1, _add=False, _load=False, _force=False, **d)
+                batch.append(t)
                 if len(batch)>=batch_size:
-                    try:
-                        coll.import_bulk(batch)
-                    except Exception as e:
-                        log.error(e)
-                        bids=[x['_addr'] for x in batch]
-                        from collections import Counter
-                        print(Counter(bids).most_common(10))
-                    
-                    batch=[]
-            if batch:
-                try:
-                    coll.import_bulk(batch)
-                except Exception as e:
-                    log.error(e)
-                    bids=[x['_addr'] for x in batch]
-                    from collections import Counter
-                    print(Counter(bids).most_common(10))
+                    batch=do_batch(batch)
+
+            do_batch(batch)
         
                 
 

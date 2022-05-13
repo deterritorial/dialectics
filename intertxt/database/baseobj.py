@@ -1,21 +1,8 @@
 #print(__file__,'imported')
-from .imports import *
+from intertxt.imports import *
 
 class BaseObject(object):
     __COLLECTION__='obj'
-
-    @property
-    def _dbtbl(self):
-        return self.__COLLECTION__
-    @property
-    def _dbkey(self):
-        return addr_to_key(self._id)
-    _key=_dbkey
-    
-    @property
-    def _dbid(self):
-        return f'{self._dbtbl}/{self._dbkey}'
-    
 
     def __getattr__(self,key):
         x=getattribute(self,key)
