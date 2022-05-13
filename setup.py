@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding='utf-8', errors='ignore') as fh:
 
 setup(
     name='intertxt',
-    version='0.0.1',
+    version='0.0.2',
     url='https://github.com/quadrismegistus/intertxt.git',
     author='Ryan Heuser',
     author_email='rj416@cam.ac.uk',
@@ -19,8 +19,6 @@ setup(
     packages=find_packages(),    
     license='MIT',
     install_requires=requirements,
-    scripts=['bin/lltk'],
-    include_package_data=True,
     classifiers=[
         #'Development Status :: 3 - Alpha',
         #'Intended Audience :: Science/Research',
