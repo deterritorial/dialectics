@@ -1,6 +1,8 @@
 #print(__file__,'imported')
 import os,sys
 from pathlib import Path
+
+TMP_CORPUS='tmp'
 PATH_USER_HOME = str(Path.home())
 PATH_HOME = os.path.join(PATH_USER_HOME,'intertxt')
 PATH_DATA = os.path.join(PATH_HOME,'data')
@@ -12,6 +14,16 @@ TO_FILE = True
 SERVERS=[
     'http://128.232.229.63:8529'
 ]
+TEXT_COLLECTION_NAME='text'
+FULL_TEXT_KEYS={'author','title'}
+
+DATABASE='intertxt'
+_ADB_ = None
+_ADB_CLIENT = None
+_ADB_SYSDB = None
+VNUM='2022_05_14b'
+GRAPHNAME='_totality_'
+
 COL_ID='id'
 COL_ADDR='_addr'
 COL_CORPUS='_corpus'
@@ -81,3 +93,7 @@ with Log('booting'):
 	from intertxt.corpora import *
 	from intertxt.models import *
 
+## convenient names/funcs
+tspace = TS = textspace = Textspace()
+find = tspace.find
+look = tspace.look

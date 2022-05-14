@@ -1,102 +1,125 @@
 #print(__file__,'imported')
 from intertxt.imports import *
-from intertxt.database.baseobj import BaseObject
-TEXT_COLLECTION_NAME='text'
-FULL_TEXT_KEYS={'author','title'}
-
-DATABASE='intertxt'
-_ADB_ = None
-_ADB_CLIENT = None
-_ADB_SYSDB = None
-VNUM='2022_05_13e'
+from .baseobj import BaseObject
 
 
-def get_database(dbname=DATABASE,force=False):
-    global _ADB_,_ADB_CLIENT,_ADB_SYSDB
 
-    if force or _ADB_ is None:
-        # Initialize the ArangoDB client.
-        from arango import ArangoClient
-        client = ArangoClient(hosts=','.join(SERVERS))
-        sysdb = client.db('_system', username='root', password='passwd')
-
-        # Create a new database named "test" if it does not exist.
-        if not sysdb.has_database(dbname):
-            sysdb.create_database(dbname)
-
-        # Connect to "test" database as root user.
-        # This returns an API wrapper for "test" database.
-        db = client.db(dbname, username='root', password='passwd')
-
-        _ADB_ = db
-        _ADB_CLIENT = client
-        _ADB_SYSDB = sysdb
+class Docspace(BaseObject):
+    def __init__(self,
+            name=TEXT_COLLECTION_NAME,
+            dbname=DATABASE+'_'+VNUM,
+            _client=None,
+            _db=None,
+            _coll=None,
+            ):
+        self.name=name
+        self.dbname=dbname
+        self._client=None
+        self._db=None
+        self._coll=None
     
-    return _ADB_
+    @property
+    def client(self):
+        if self._client is None: self.init_database()
+        return self._client
+    @property
+    def db(self):
+        if self._db is None: self.init_database()
+        return self._db
+    @property
+    def coll(self): 
+        if self._coll is None: self.init_collection()
+        return self._coll
 
+    def init_database(self,force=False):
+        if force or self._db is None:
+            from arango import ArangoClient
+            self._client = ArangoClient(hosts=','.join(SERVERS))
+            self._sydb  = self._client.db('_system', username='root', password='passwd')
+            self._db = self._client.db(self.dbname, username='root', password='passwd')
+        return self.db
 
-def get_collection(name,dbname=DATABASE,drop=False):
-    dbname=f'{dbname}_{VNUM}'
-    db=get_database(dbname)
-    if db.has_collection(name): 
-        if drop: 
-            db.delete_collection(name)
+    def init_collection(self,drop=False):
+        if self.db.has_collection(self.name): 
+            if drop: 
+                self.db.delete_collection(self.name)
+                self._coll=self.db.create_collection(self.name)
+            else:
+                self._coll=self.db.collection(self.name)
+                return self._coll
         else:
-            return db.collection(name)
-    
-    coll=db.create_collection(name)
+            self._coll=self.db.create_collection(self.name)
+        return self._coll
+        
 
-    coll.add_persistent_index(fields=['_addr'],unique=True)
-    coll.add_persistent_index(fields=['_corpus'])
-    coll.add_persistent_index(fields=['id'])
-    coll.add_persistent_index(fields=['au'])
-    coll.add_persistent_index(fields=['ti'])
-    coll.add_persistent_index(fields=['yr'])
+            
+    ### TREATS FULL TEXT OPERATOR FOR MULTIPLE ARGUMENTS AS 'OR' so far
+    def find(self,*args,**kwargs):
+        from intertxt.texts.textlist import TextList
+        return TextList(self.look(*args,**kwargs))
+    def look(self, id_key=COL_ADDR, **query_meta):
+        from intertxt import Text,Log
+            
+        # prime
+        if not self.coll: return
 
-    coll.add_fulltext_index(fields=['author'])
-    coll.add_fulltext_index(fields=['title'])
+        fulltextmeta={k:v for k,v in query_meta.items() if k in FULL_TEXT_KEYS}
+        exactmeta={k:v for k,v in query_meta.items() if k not in FULL_TEXT_KEYS}
 
-    return coll
+        ids_given=set()
 
-
-
-def get_text_collection(name=TEXT_COLLECTION_NAME,**kwargs):
-    return get_collection(name,**kwargs)
-
-
-# underscored={'corpus','au','ti','yr','addr'}
-
-### TREATS OPERATOR FOR MULTIPLE ARGUMENTS AS 'OR' so far
-def look(_collection=TEXT_COLLECTION_NAME, id_key=COL_ADDR, **query_meta):
-    from intertxt import Text,Log
-
-    
-    coll=get_collection(_collection)
-    fulltextmeta={k:v for k,v in query_meta.items() if k in FULL_TEXT_KEYS}
-    exactmeta={k:v for k,v in query_meta.items() if k not in FULL_TEXT_KEYS}
-
-    ids_given=set()
-
-    if exactmeta:
-        with Log(f'Querying exact metadata: {exactmeta}'):
-            res_exact = coll.find(exactmeta)
-            for d in res_exact:
-                id=d.get(id_key)
-                if id not in ids_given:
-                    yield Text(**d)
-                    ids_given|={id}
-    
-    if fulltextmeta:
-        with Log(f'Querying full text metadata: {fulltextmeta}'):
-            for qk,qv in fulltextmeta.items():
-                res = coll.find_by_text(qk,qv)
-                for d in res:
+        if exactmeta:
+            with Log(f'Querying exact metadata: {exactmeta}'):
+                res_exact = self.coll.find(exactmeta)
+                for d in res_exact:
                     id=d.get(id_key)
                     if id not in ids_given:
                         yield Text(**d)
                         ids_given|={id}
+        
+        if fulltextmeta:
+            with Log(f'Querying full text metadata: {fulltextmeta}'):
+                for qk,qv in fulltextmeta.items():
+                    res = self.coll.find_by_text(qk,qv)
+                    for d in res:
+                        id=d.get(id_key)
+                        if id not in ids_given:
+                            yield Text(**d)
+                            ids_given|={id}
+
+
+
+class Textspace(Docspace):
+    def init(self,drop=False):
+        super().init(drop=drop)
+        if self.coll:
+            coll=self.coll
+            coll.add_persistent_index(fields=['_addr'],unique=True)
+            coll.add_persistent_index(fields=['_corpus'])
+            coll.add_persistent_index(fields=['id'])
+            coll.add_persistent_index(fields=['au'])
+            coll.add_persistent_index(fields=['ti'])
+            coll.add_persistent_index(fields=['yr'])
+            coll.add_fulltext_index(fields=['author'])
+            coll.add_fulltext_index(fields=['title'])
+        return self
 
 
 
 
-def find(*args,**kwargs): return list(look(*args,**kwargs))
+
+
+DOCSPACES={}
+def DocspaceX(name, dbname=f"{DATABASE}_{VNUM}", force=False, _class=Docspace,**kwargs):
+    if not force and (name,dbname) in DOCSPACES:
+        return DOCSPACES[(name,dbname)]
+    obj = _class(name=name,dbname=dbname)
+    DOCSPACES[(name,dbname)] = obj
+    return obj
+
+
+def Textspace(force=False, **kwargs):
+    return Docspace(TEXT_COLLECTION_NAME, **kwargs)
+
+    
+

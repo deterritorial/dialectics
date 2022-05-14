@@ -1,6 +1,5 @@
 #print(__file__,'imported')
 from intertxt.imports import *
-from intertxt.database import get_collection,TEXT_COLLECTION_NAME
 log = Log()
 
 
@@ -34,9 +33,26 @@ class BaseText(BaseObject):
     def __init__(self,id=None,_corpus=None,_source=None,**kwargs):
         self._keys=TextKeys(id=id,_corpus=_corpus,_source=_source,**kwargs)
         self._data=kwargs
+        self._node=None
+
+    def __str__(self):
+        return f"Text('{self._addr}')"
 
     def __repr__(self):
-        return f"Text('{self._addr}')"
+        return self.nice
+    
+    def is_valid(self):
+        return self.addr and is_addr(self.addr)
+
+    @property
+    def nice(self,force=True):
+        if not self.is_valid(): return ''
+        yr,au,ti,addr = self.yr, self.au, self.ti, self.addr
+        austr=f"{au}, " if au else ""
+        tistr=f"{ti.upper()[:50].strip()} " if ti else ""
+        yrstr=f"({int(yr)}) " if safebool(yr) else ""
+        addrstr=f"[{addr}]"
+        return ''.join([austr,tistr,yrstr,addrstr])
 
     def __getattr__(self,key):
         res = super().__getattr__(key)
@@ -105,13 +121,13 @@ class BaseText(BaseObject):
 
 
     @property
-    def collection(self): return get_collection(self.__COLLECTION__)
-    coll=collection
+    def coll(self): return Textspace().coll
+    collection=coll
     
     ## database funcs
     def load(self,force=False):
         if force or not self._loadd:
-            data = self.collection.get(self._key)
+            data = self.coll.get(self._key)
             if data: self._data={**self._data,**just_meta(data)}
             self._loadd=True
 
@@ -141,9 +157,9 @@ class BaseText(BaseObject):
             try:
                 saved_meta = self.coll.insert(to_insert)
             except Exception as e:
-                if log: log.error(e)
+                if log: log.error(f'{e}. d = {to_insert}')
         if log>1: log(saved_meta)
-        return saved_meta
+        return {**to_insert, **saved_meta}
         
     
     def save(self):
@@ -166,6 +182,9 @@ class BaseText(BaseObject):
     def relate(self,other,rel=MATCHRELNAME,rel_type='',yn='',**kwargs):
         other = Text(other)
         
+        # odx={
+            
+        # }
 
 
 
