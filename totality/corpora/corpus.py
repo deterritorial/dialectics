@@ -1,6 +1,6 @@
 #print(__file__,'imported')
-from intertxt.imports import *
-from intertxt.texts import BaseText
+from totality.imports import *
+from totality.texts import BaseText
 
 CORPUS_CACHE={}
 def Corpus(id=TMP_CORPUS,_force=False,**kwargs):

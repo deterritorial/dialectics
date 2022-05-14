@@ -1,4 +1,4 @@
-from intertxt.imports import *
+from totality.imports import *
 
 
 

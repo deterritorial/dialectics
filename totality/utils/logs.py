@@ -1,5 +1,5 @@
 ##print(__file__,'imported')
-from intertxt.imports import *
+from totality.imports import *
 from loguru import logger
 import time
 LOGGER=None
@@ -113,7 +113,7 @@ class Logger():
 
     def start_file(self):
         if self.id_file is None and self.fn:
-            from intertxt.utils import ensure_dir_exists,backup_fn,rmfn
+            from totality.utils import ensure_dir_exists,backup_fn,rmfn
             ensure_dir_exists(self.fn)
             if os.path.exists(self.fn): backup_fn(self.fn)
             rmfn(self.fn)
@@ -132,7 +132,7 @@ class Logger():
                 # rmfn(self.fn)
 
     def __getattr__(self,name):
-        from intertxt.utils import getattribute
+        from totality.utils import getattribute
         res = getattribute(self,name)
         if res is None: res = getattribute(self.logger,name)
         return res

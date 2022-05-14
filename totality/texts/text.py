@@ -1,6 +1,6 @@
 #print(__file__,'imported')
-from intertxt.imports import *
-from intertxt.database import get_collection,TEXT_COLLECTION_NAME
+from totality.imports import *
+from totality.database import get_collection,TEXT_COLLECTION_NAME
 log = Log()
 
 
@@ -13,7 +13,7 @@ TMP_CORPUS='tmp'
 
 def Text(id=None, _corpus=None, _force=False, **kwargs):
     global TEXT_CACHE
-    from intertxt.corpora import Corpus
+    from totality.corpora import Corpus
 
     if not _corpus and is_text_obj(id): return id
     

@@ -7,12 +7,12 @@ with open("requirements.txt", "r", encoding='utf-8', errors='ignore') as fh:
     requirements = [x.strip() for x in fh.read().split('\n') if x.strip()]
 
 setup(
-    name='intertxt',
+    name='totality',
     version='0.0.3',
-    url='https://github.com/quadrismegistus/intertxt.git',
+    url='https://github.com/deterritorial/totality.git',
     author='Ryan Heuser',
     author_email='rj416@cam.ac.uk',
-    description='Resources for studying, modeling, resisting, coding, and conceptualizing the intertxtual.',
+    description='Resources for studying, modeling, resisting, coding, and conceptualizing the totalityual.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     

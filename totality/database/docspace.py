@@ -1,10 +1,10 @@
 #print(__file__,'imported')
-from intertxt.imports import *
-from intertxt.database.baseobj import BaseObject
+from totality.imports import *
+from totality.database.baseobj import BaseObject
 TEXT_COLLECTION_NAME='text'
 FULL_TEXT_KEYS={'author','title'}
 
-DATABASE='intertxt'
+DATABASE='totality'
 _ADB_ = None
 _ADB_CLIENT = None
 _ADB_SYSDB = None
@@ -68,7 +68,7 @@ def get_text_collection(name=TEXT_COLLECTION_NAME,**kwargs):
 
 ### TREATS OPERATOR FOR MULTIPLE ARGUMENTS AS 'OR' so far
 def look(_collection=TEXT_COLLECTION_NAME, id_key=COL_ADDR, **query_meta):
-    from intertxt import Text,Log
+    from totality import Text,Log
 
     
     coll=get_collection(_collection)

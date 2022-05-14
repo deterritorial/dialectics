@@ -1,5 +1,5 @@
 from lib2to3.pytree import Base
-from intertxt.imports import *
+from totality.imports import *
 
 
 

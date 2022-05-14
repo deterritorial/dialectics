@@ -2,7 +2,7 @@
 import os,sys
 from pathlib import Path
 PATH_USER_HOME = str(Path.home())
-PATH_HOME = os.path.join(PATH_USER_HOME,'intertxt')
+PATH_HOME = os.path.join(PATH_USER_HOME,'totality')
 PATH_DATA = os.path.join(PATH_HOME,'data')
 PATH_CONFIG = os.path.join(PATH_HOME,'config')
 PATH_CORPORA = os.path.join(PATH_HOME,'corpora')
@@ -73,11 +73,11 @@ import humanize
 
 
 ## me
-from intertxt.utils.logs import *
+from totality.utils.logs import *
 with Log('booting'):
-	from intertxt.utils import *
-	from intertxt.database import *
-	from intertxt.texts import *
-	from intertxt.corpora import *
-	from intertxt.models import *
+	from totality.utils import *
+	from totality.database import *
+	from totality.texts import *
+	from totality.corpora import *
+	from totality.models import *
 

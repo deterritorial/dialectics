@@ -15,12 +15,12 @@ def is_valid_text_obj(obj):
     return is_text_obj(obj) and obj.id_is_valid()
 
 def is_text_obj(obj):
-    from intertxt.texts import BaseText
+    from totality.texts import BaseText
     if issubclass(type(obj), BaseText): return True
     return False
 
 def is_corpus_obj(obj): 
-    from intertxt.corpora import BaseCorpus
+    from totality.corpora import BaseCorpus
     return issubclass(type(obj), BaseCorpus)
 
 
@@ -227,7 +227,7 @@ def is_iterable(v):
 
 
 def setup():
-    from intertxt import log,PATH_HOME,PATH_DATA,PATH_CONFIG,PATH_CORPORA
+    from totality import log,PATH_HOME,PATH_DATA,PATH_CONFIG,PATH_CORPORA
     # create paths
     for path in [PATH_HOME,PATH_DATA,PATH_CONFIG,PATH_CORPORA]:
         if not os.path.exists(path):

@@ -1,11 +1,11 @@
 #print(__file__,'imported')
-from intertxt.imports import *
+from totality.imports import *
 
 
 
 
 def get_addr_str(text=None,corpus=None,source=None,**kwargs):
-    from intertxt.corpora import Corpus
+    from totality.corpora import Corpus
     corpus=Corpus(corpus)
 
     # rescue via source?

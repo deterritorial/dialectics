@@ -1,4 +1,4 @@
-from intertxt.imports import *
+from totality.imports import *
 
 from collections import UserList
 class TextList(UserList, BaseObject):
@@ -45,5 +45,5 @@ if %s:
 
 
 
-    # for text in intertxt.find(author="Eliza Haywood"):
+    # for text in totality.find(author="Eliza Haywood"):
     #      print(f"""{str(text)[:30]:<30}\t{str(text.author)[:25]:<25}\t{str(text.title)[:50]:<50}\t{text.year}""")
