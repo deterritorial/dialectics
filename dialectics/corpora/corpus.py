@@ -1,6 +1,6 @@
 #print(__file__,'imported')
-from dialectics.imports import *
-from dialectics.texts import BaseText
+from totality.imports import *
+from totality.texts import BaseText
 log = Log()
 
 def Corpus(id=TMP_CORPUS,_force=False,**kwargs):

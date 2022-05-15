@@ -1,5 +1,5 @@
 #print(__file__,'imported')
-from dialectics.imports import *
+from totality.imports import *
 from .baseobj import BaseObject
 log = Log()
 
@@ -71,12 +71,12 @@ class DocspaceModel(BaseObject):
     ### TREATS FULL TEXT OPERATOR FOR MULTIPLE ARGUMENTS AS 'OR' so far
     def find(self,*args,**kwargs):
         if log>1: log(self)
-        from dialectics.texts.textlist import TextList
+        from totality.texts.textlist import TextList
         return TextList(self.look(*args,**kwargs))
 
 
     def get(self,id,default=None):
-        from dialectics.texts import Text
+        from totality.texts import Text
         from .relspace import Relspace
 
         if id in TEXT_CACHE: return TEXT_CACHE[id]
@@ -90,7 +90,7 @@ class DocspaceModel(BaseObject):
         
     def look(self, id_key=COL_ADDR, **query_meta):
         if log>1: log(self)
-        from dialectics import Text,Log
+        from totality import Text,Log
             
         # prime
         if not self.coll: return

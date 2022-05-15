@@ -4,7 +4,7 @@ from pathlib import Path
 
 TMP_CORPUS='tmp'
 PATH_USER_HOME = str(Path.home())
-PATH_HOME = os.path.join(PATH_USER_HOME,'dialectics')
+PATH_HOME = os.path.join(PATH_USER_HOME,'totality')
 PATH_DATA = os.path.join(PATH_HOME,'data')
 PATH_CONFIG = os.path.join(PATH_HOME,'config')
 PATH_CORPORA = os.path.join(PATH_HOME,'corpora')
@@ -96,11 +96,11 @@ import humanize
 
 
 ## me
-from dialectics.utils.logs import *
+from totality.utils.logs import *
 with Log('booting'):
-	from dialectics.utils import *
-	from dialectics.database import *
-	from dialectics.texts import *
-	from dialectics.corpora import *
-	from dialectics.models import *
+	from totality.utils import *
+	from totality.database import *
+	from totality.texts import *
+	from totality.corpora import *
+	from totality.models import *
 

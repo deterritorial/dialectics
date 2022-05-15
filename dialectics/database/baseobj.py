@@ -1,5 +1,5 @@
 #print(__file__,'imported')
-from dialectics.imports import *
+from totality.imports import *
 
 class BaseObject(object):
     __COLLECTION__='obj'

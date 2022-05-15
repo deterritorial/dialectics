@@ -1,1 +1,1 @@
-from dialectics.imports import *
+from totality.imports import *

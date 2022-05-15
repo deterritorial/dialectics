@@ -7,12 +7,12 @@ with open("requirements.txt", "r", encoding='utf-8', errors='ignore') as fh:
     requirements = [x.strip() for x in fh.read().split('\n') if x.strip()]
 
 setup(
-    name='dialectics',
+    name='totality',
     version='0.0.4',
-    url='https://github.com/deterritorial/dialectics.git',
+    url='https://github.com/deterritorial/totality.git',
     author='Ryan Heuser',
     author_email='rj416@cam.ac.uk',
-    description='Code, data, and models to support dialectics as a weapon of thinking, analysis and action.',
+    description='Code, data, and models to support totality as a weapon of thinking, analysis and action.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     

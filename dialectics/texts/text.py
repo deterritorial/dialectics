@@ -1,5 +1,5 @@
 #print(__file__,'imported')
-from dialectics.imports import *
+from totality.imports import *
 log = Log()
 
 
@@ -7,7 +7,7 @@ log = Log()
 
 def Text(id=None, _corpus=None, _force=False, **kwargs):
     global TEXT_CACHE
-    from dialectics.corpora import Corpus
+    from totality.corpora import Corpus
 
     if not _corpus and is_text_obj(id): return id
     
@@ -101,7 +101,7 @@ class BaseText(BaseObject):
     @property
     def corpus(self):
         if not self._corpusobj:
-            from dialectics.corpora import Corpus
+            from totality.corpora import Corpus
             self._corpusobj=Corpus(self._corpus) 
         return self._corpusobj
     
@@ -186,7 +186,7 @@ class BaseText(BaseObject):
 
 
     def relate(self,other,rel=MATCHRELNAME,rel_type='',yn='',**kwargs):
-        from dialectics.database import Relspace
+        from totality.database import Relspace
         other = Text(other)
         return Relspace().link(self,other,rel=rel,rel_type=rel_type,yn=yn,**just_meta_no_id(kwargs))
     
@@ -244,7 +244,7 @@ class BaseText(BaseObject):
         return g
 
     def draw_ties(self,g=None,**kwargs):
-        from dialectics.models.networks import draw_nx
+        from totality.models.networks import draw_nx
         if g is None: g=self.graph_ties(**kwargs)
         return draw_nx(g)
         

@@ -1,4 +1,4 @@
-from dialectics.imports import *
+from totality.imports import *
 from collections import UserList
 from .text import Text
 
@@ -159,7 +159,7 @@ class TextList(BaseObject, UserList):
         return df
 
     def match(self,rel=MATCHRELNAME,_progress=True,**kwargs):
-        from dialectics.models.matching import match_by_title
+        from totality.models.matching import match_by_title
 
         inpdf = self.get_titlematch_input_df()
         if not safebool(inpdf): return pd.DataFrame()
@@ -182,7 +182,7 @@ class TextList(BaseObject, UserList):
         return slices(data,n=n)
 
     def into_lsh(self,progress=True,batch_n=10):
-        from dialectics.models.matching import get_lsh,get_all_lsh_keys
+        from totality.models.matching import get_lsh,get_all_lsh_keys
         lsh = get_lsh()
         lshkeys = get_all_lsh_keys(lsh)
         texts = [t for t in self if t.addr not in lshkeys]
@@ -199,7 +199,7 @@ class TextList(BaseObject, UserList):
         
     
     def match_by_hash(self,progress=True):
-        from dialectics.models.matching import get_lsh
+        from totality.models.matching import get_lsh
         lsh = get_lsh()
         iterr=self
         if progress: iterr=get_tqdm(iterr,desc='Finding matches')

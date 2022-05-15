@@ -1,2 +1,2 @@
 #print(__file__,'imported')
-from dialectics.imports import *
+from totality.imports import *
