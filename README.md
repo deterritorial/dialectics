@@ -1,5 +1,4 @@
 # dialectics
 
-Resources for studying, modeling, resisting, coding, conceptualizing social, material, and spiritual life in its dialectical dialectics.
-
+Code, data, and models to support dialectics as a weapon of thought.
 
