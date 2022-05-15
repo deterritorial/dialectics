@@ -28,7 +28,7 @@ class TextList(BaseObject, UserList):
     uniq=data_uniq
 
     def __iter__(self): yield from self.data
-    def __len__(self): return len(self.data_all)
+    def __len__(self): return len(self.data_all) if self.data_all else 0
 
     def __repr__(self,maxnum=25):
         pref='TextList('
@@ -72,7 +72,7 @@ class TextList(BaseObject, UserList):
             progress=False,
             force=True,
             force_inner=True,
-            desc='[LLTK] iterating distinct texts',
+            desc='iterating distinct texts',
             leave=True,
             **kwargs):
 
@@ -136,7 +136,7 @@ class TextList(BaseObject, UserList):
         
 
     def matchgraph(self,draw=True,node_name='node',**kwargs):
-        from lltk.model.networks import draw_nx
+        from totality.models.networks import draw_nx
         g=self.get_matchgraph(node_name=node_name)
         return g if g is None or not draw else draw_nx(g)
 
@@ -150,26 +150,33 @@ class TextList(BaseObject, UserList):
         for t in self: t.queue_remote_sources()
 
 
-    def get_titlematch_input_df(self):
+    def get_titlematch_input_df(self,text_iter=None):
+        if not text_iter: text_iter = self
         df = pd.DataFrame(
             dict(id=t.addr, author=t.au, title=t.ti)
-            for t in self
+            for t in text_iter
             if t.au and t.ti
         ).set_index('id')
         return df
 
-    def match(self,rel=MATCHRELNAME,_progress=True,**kwargs):
+    def match(self, *texts,rel=MATCHRELNAME,_progress=True,**kwargs):
         from totality.models.matching import match_by_title
 
         inpdf = self.get_titlematch_input_df()
+        inpdf2 = None if not texts else self.get_titlematch_input_df(text_iter=texts)
         if not safebool(inpdf): return pd.DataFrame()
-        matchdf = match_by_title(inpdf)
+        
+        matchdf = match_by_title(df=inpdf, df2=inpdf2, **kwargs)
+
         if not safebool(matchdf): return pd.DataFrame()
 
         iterr=zip(matchdf.id_1,matchdf.id_2)
-        if _progress: iterr=get_tqdm(list(iterr))
+        if _progress: iterr=get_tqdm(list(iterr), desc='Relating texts (as {rel})')
         for id1,id2 in iterr:
-            Text(id1).relate(Text(id2), rel=rel, **kwargs)
+            t1=Text(id1)
+            t2=Text(id2)
+            t1.relate(t2, rel=rel, **kwargs)
+            iterr.set_description(f'Relating {t1} to {t2} via the "{rel}" relation')
         
         return matchdf
 

@@ -1,4 +1,7 @@
-from lltk.imports import *
+from totality.imports import *
+import networkx as nx
+
+
 
 def filter_graph(g,min_weight=None,remove_isolates=True,min_degree=2,**kwargs):
     if min_weight:

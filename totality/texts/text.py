@@ -17,7 +17,8 @@ def Text(id=None, _corpus=None, _force=False, **kwargs):
         t = TEXT_CACHE[addr]
     else:
         corp,id=keys.get(COL_CORPUS),keys.get(COL_ID)
-        t = TEXT_CACHE[addr] = Corpus(corp).text(id,**kwargs)
+        t = Corpus(corp).text(id,**kwargs)
+        TEXT_CACHE[t.addr] = TEXT_CACHE[t._id] = TEXT_CACHE[t._key] = t
     
     return t
 
@@ -91,7 +92,36 @@ class BaseText(BaseObject):
     @property
     def _meta(self):
         return self.ensure_id(just_meta(self._data))
-    meta=_meta
+
+    @property
+    def meta(self): return just_meta_no_id(self._meta) #metadata()
+    def metadata(self,sources=True,stamp_source=False,**kwargs):
+        meta = OrderedSetDict()
+        for k,v in just_meta_no_id(self._data).items(): meta[k]=v
+        if sources:
+            for src in self.copies():
+                for k,v in just_meta_no_id(src._data).items():
+                    mk=k if not stamp_source else k+'__'+src._corpus
+                    meta[mk]=v
+        odx={k:v for k,v in sorted(meta.to_dict().items())}
+        return self.ensure_id(odx)
+
+    def metadata_srcs(self,sources=True,**kwargs):
+        dds={}
+        meta_srcs = [self] + (list(self.copies()) if sources else [])
+        for src in meta_srcs:
+            for k,v in just_meta_no_id(src._data).items():
+                if not k in dds: dds[k]={}
+                if not v in dds[k]: dds[k][v]=set()
+                dds[k][v]|={src._corpus}
+        odx={k:v for k,v in sorted(dds.items())}
+        return self.ensure_id(odx)
+
+
+
+
+
+
     data=_meta
     @property
     def _params(self): return self.ensure_id(just_params(self._data))
@@ -100,7 +130,7 @@ class BaseText(BaseObject):
     _addr=addr
     @property
     def corpus(self):
-        if not self._corpusobj:
+        if self._corpusobj is not None:
             from totality.corpora import Corpus
             self._corpusobj=Corpus(self._corpus) 
         return self._corpusobj
@@ -122,7 +152,21 @@ class BaseText(BaseObject):
             newmeta,
         )
 
+    def copies(self,find_if_nec=True):
+        from arango import GraphTraverseError
+        try:
+            return self.ties(rel=MATCHRELNAME)
+        except GraphTraverseError:
+            if find_if_nec:
+                self.find_copies()
+                return self.copies(find_if_nec=False)
+        return []
 
+    def find_copies(self):
+        if self.au:
+            tl = self.tspace.find(au=self.au)
+            mdf = tl.match(self)
+        return self.copies()
 
 
 
@@ -214,6 +258,7 @@ class BaseText(BaseObject):
             direction="any",
             strategy="depthfirst",
             max_depth=2,
+            rel=MATCHRELNAME,
             **kwargs):
         from .textlist import TextList
         
@@ -225,22 +270,62 @@ class BaseText(BaseObject):
             **kwargs
         )
 
+    def all_ties(self,data=False,rel=MATCHRELNAME,**kwargs):
+        traversal_data = self.traverse_ties(**kwargs)
+        o=set()
+        dd={
+            vertexd.get('_id'):vertexd
+            for vertexd in traversal_data.get('vertices',[])
+        }
+        for pathd in traversal_data.get('paths',[]):
+            for edged in pathd.get('edges'):
+                if not rel or edged.get('rel') == rel:
+                    for _id in [edged.get('_from'), edged.get('_to')]:
+                        if _id and _id in dd:
+                            td = dd[_id]
+                            t = Text(td)
+                            o|={t}
+        return o
+    
+    
+    def ties(self, only_strong=False, rel=MATCHRELNAME, allow_tmp=False, **kwargs):
+        o = self.strong_ties() if only_strong else self.all_ties()
+        if o and not allow_tmp: o = {t for t in o if t._corpus != TMP_CORPUS}
+        return o
+
     def weak_ties(self,data=False,**kwargs):
         from .textlist import TextList
-        all_ties = {Text(d) for d in self.traverse_ties(**kwargs)}
+
+        all_ties = self.all_ties(data=data,**kwargs)
+        if log: log(f'all_tues = {all_ties}')
+        
         strong_ties = set(self.strong_ties())
+        if log: log(f'strong_ties = {strong_ties}')
+        
         weak_ties = all_ties - strong_ties - {self}
+        if log: log(f'weak+ties = {weak_ties}')
+        
         return weak_ties if not data else [(t,{}) for t in weak_ties]
 
-    def graph_ties(self,**kwargs):
+    def graph_ties(self,allow_tmp=False,**kwargs):
         import networkx as nx
         g=nx.DiGraph()
         traversal_data = self.traverse_ties(**kwargs)
+        dd={
+            vertexd.get('_id'):vertexd
+            for vertexd in traversal_data.get('vertices',[])
+        }
         for pathd in traversal_data.get('paths',[]):
             for edged in pathd.get('edges'):
-                t1=Textspace().get(edged.get('_from'))
-                t2=Textspace().get(edged.get('_to'))
-                g.add_edge(t1.nice, t2.nice, **edged)
+                d1=dd.get(edged.get('_from',''),{})
+                d2=dd.get(edged.get('_to',''),{})
+                if d1 and d2:
+                    t1=Text(d1)
+                    t2=Text(d2)
+                    ts={t1,t2}-{self}
+                    cs={tx._corpus for tx in ts}
+                    if allow_tmp or not {TMP_CORPUS}&cs:
+                        g.add_edge(t1.nice, t2.nice, **edged)
         return g
 
     def draw_ties(self,g=None,**kwargs):
@@ -248,12 +333,12 @@ class BaseText(BaseObject):
         if g is None: g=self.graph_ties(**kwargs)
         return draw_nx(g)
         
+    def sources(self): return self.ties()
 
 
 
 
-
-    def get_txt(self,sources=False):
+    def get_txt(self,sources=True):
         if self._txt: return self._txt
         for pathtype,path in self.paths.items():
             if pathtype.startswith('txt') and os.path.exists(path):
@@ -271,10 +356,9 @@ class BaseText(BaseObject):
     @property
     def txt(self): return self.get_txt()
 
-    def tokens(self,tokenizer=tokenize_fast,lower=True):
-        return tokenizer(
-            self.txt.lower() if lower else self.txt
-        )
+    def tokens(self,tokenizer=tokenize_fast,lower=True,sources=True):
+        txt=self.get_txt(sources=sources)
+        return tokenizer(txt.lower() if lower else txt)
 
     def counts(self,tokens=None,**kwargs):
         if not tokens: tokens=self.tokens(**kwargs)
@@ -284,7 +368,7 @@ class BaseText(BaseObject):
 
     def minhash(self,cache=True,force=False):
         if not self._minhash:
-            words = self.tokens()
+            words = self.tokens(sources=False)
             if not words: return None
             
             from datasketch import MinHash

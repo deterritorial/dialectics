@@ -2,7 +2,6 @@ from totality.models import *
 
 def run_match_by_title(*x,**y):
     print(f'run_match_by_title({x},{y})')
-    # from lltk.model.orm import CDB
     # db=CDB(force=True)
     bag = match_by_title(*x,**y)#db=db,
     return bag
@@ -30,11 +29,9 @@ def match_by_author(self,corpora=['chadwyck','chicago','txtlab','tedjdh']):
             # break
 
 
-def match_by_title(df,
-        yn='',
-        rel=MATCHRELNAME,
-        rel_type='title',
-        db=None,
+def match_by_title(
+        df,
+        df2=None,
         full=False,
         compare_by=DEFAULT_COMPAREBY,
         method_string='levenshtein',
@@ -45,12 +42,13 @@ def match_by_title(df,
     indexer = rl.Index()
     indexer.block(left_on='author', right_on='author') if not full else indexer.full()
     # get candidates
-    candidates = indexer.index(df, df)
+    df2= (df2 if df2 is not None else df)
+    candidates = indexer.index(df,df2)
     # set up comparison model
     c = rl.Compare()
     for k,v in compare_by.items():
         c.string(k,k,threshold=v,method=method_string) if v<1.0 else c.exact(k,k)
-    res = c.compute(candidates, df, df)
+    res = c.compute(candidates, df, df2)
 
     res.columns = [f'match_{k}' for k in compare_by]
     res['match_sum'] = res.sum(axis=1)
@@ -60,46 +58,6 @@ def match_by_title(df,
     res = res[res.id_1 != res.id_2]
     res = res[res.match==True]
     return res
-
-    # # add matches
-    # osd=OrderedSetDict()
-    # for id1,id2 in zip(res.id_1,res.id_2):
-    #     osd[id1]=(id2,yn,rel,rel_type)
-    # # if log: log(pf(osd.to_dict()))
-    # # display(osd.to_dict())
-    # # matchdf.to_csv(time.time()+'.csv')
-
-    # return osd
-
-    #return match_multiple(osd,db=db,**kwargs)
-    
-
-def match_multiple(others_osd,yn='',rel=MATCHRELNAME,rel_type='',db=None,db_force=False,**kwargs):
-    log(pf(others_osd.to_dict()))
-    from lltk.model.orm import CDB
-    db = CDB(force=db_force) if db is None else db
-    o=[]
-    alltexts=set()
-    for id1 in others_osd:
-        for id2,yn,rel,rel_rype in others_osd[id1]:
-            if log:
-                log(f'{id1} --{rel}-> {id2}')
-                log(f'{id2} --{rel}-> {id1}')
-            
-            t1,t2=Text(id1),Text(id2)
-            relmeta=dict(yn=yn,rel=rel,rel_type=rel_type,**just_meta_no_id(kwargs))
-            t1._rels[t2.addr]=relmeta
-            t2._rels[t1.addr]=relmeta
-            alltexts|={t1,t2}
-    
-    bag=[]
-    for t in alltexts:
-        promise = db.session.execute_async(
-            db.setfunc_match, [t.addr,serialize_map(t.rels)],
-            #callback=
-        )
-        bag.append(promise)
-    return bag
 
 
 def get_lsh(redis=True, threshold=0.95):
@@ -135,18 +93,16 @@ def find_matches_by_hash(self, texts_iter=None, lsh=None, threshold=0.95, progre
             except Exception as e:
                 self.log.error(e)
     
-    # for t in LLTK(author='Gibson'):
     o=[]
     if texts:
         iterr = texts
-        if progress and len(texts)>=0: iterr=get_tqdm(texts,desc='[LLTK] Matching texts')
+        if progress and len(texts)>=0: iterr=get_tqdm(texts,desc='Matching texts')
         for t in iterr:
             for t2addr in lsh.query(t.minhash()):
                 if t2addr!=t.addr:
                     t2=Text(t2addr)
                     t.add_source(t2,rel_type='minhash')
                     o.append((t.addr,t2.addr))
-                    # iterr.set_description(f'[LLTK] Matching: {t.addr} -> {t2.addr}')
     return o
 
 
