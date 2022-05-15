@@ -21,12 +21,12 @@ SERVERS=[
 TEXT_COLLECTION_NAME='text'
 FULL_TEXT_KEYS={'author','title'}
 
-DATABASE='dialectics'
+DATABASE='totality'
 _ADB_ = None
 _ADB_CLIENT = None
 _ADB_SYSDB = None
 VNUM='2022_05_14h'
-GRAPHNAME='_dialectics_'
+GRAPHNAME='_totality_'
 
 COL_ID='id'
 COL_ADDR='_addr'

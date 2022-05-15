@@ -8,11 +8,11 @@ with open("requirements.txt", "r", encoding='utf-8', errors='ignore') as fh:
 
 setup(
     name='dialectics',
-    version='0.0.3',
+    version='0.0.4',
     url='https://github.com/deterritorial/dialectics.git',
     author='Ryan Heuser',
     author_email='rj416@cam.ac.uk',
-    description='Resources for studying, modeling, resisting, coding, and conceptualizing the dialecticsual.',
+    description='Code, data, and models to support dialectics as a weapon of thinking, analysis and action.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     
