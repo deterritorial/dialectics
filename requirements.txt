@@ -5,3 +5,4 @@ humanize
 numpy
 loguru
 python-arango
+csvloader

@@ -1,4 +1,4 @@
-from totality.models import *
+from dialectics.models import *
 
 def run_match_by_title(*x,**y):
     print(f'run_match_by_title({x},{y})')
@@ -7,6 +7,28 @@ def run_match_by_title(*x,**y):
     bag = match_by_title(*x,**y)#db=db,
     return bag
     #return [promise.result() for promise in bag]
+
+
+def match_by_author(self,corpora=['chadwyck','chicago','txtlab','tedjdh']):
+    authors=OrderedSetDict()
+    for c in get_tqdm(corpora):
+        for t in lookfor_texts(_corpus=c):
+            authors[t.au]=t.addr
+
+    l=list(authors.items())
+    iterr=sorted(l)
+    iterr=get_tqdm(l)
+    for au,addrs in iterr:
+        au_tl = TextList(addrs)
+        if len(au_tl)>1: 
+            matchdf = au_tl.match(_progress=False)
+            desc=f'{au} ({len(addrs)}t, {len(matchdf)}m)'
+            if safebool(matchdf) and 'id_1' in set(matchdf.columns):
+                desc+=f' [e.g. {Text(matchdf.id_1.iloc[-1])._id} ]'
+                iterr.set_description(desc)
+            
+            # break
+
 
 def match_by_title(df,
         yn='',
@@ -37,16 +59,19 @@ def match_by_title(df,
     res=res.reset_index()
     res = res[res.id_1 != res.id_2]
     res = res[res.match==True]
+    return res
 
-    # add matches
-    osd=OrderedSetDict()
-    for id1,id2 in zip(res.id_1,res.id_2):
-        osd[id1]=(id2,yn,rel,rel_type)
-    # if log: log(pf(osd.to_dict()))
-    # display(osd.to_dict())
-    # matchdf.to_csv(time.time()+'.csv')
+    # # add matches
+    # osd=OrderedSetDict()
+    # for id1,id2 in zip(res.id_1,res.id_2):
+    #     osd[id1]=(id2,yn,rel,rel_type)
+    # # if log: log(pf(osd.to_dict()))
+    # # display(osd.to_dict())
+    # # matchdf.to_csv(time.time()+'.csv')
 
-    return match_multiple(osd,db=db,**kwargs)
+    # return osd
+
+    #return match_multiple(osd,db=db,**kwargs)
     
 
 def match_multiple(others_osd,yn='',rel=MATCHRELNAME,rel_type='',db=None,db_force=False,**kwargs):
@@ -77,8 +102,22 @@ def match_multiple(others_osd,yn='',rel=MATCHRELNAME,rel_type='',db=None,db_forc
     return bag
 
 
+def get_lsh(redis=True, threshold=0.95):
+    from datasketch import MinHashLSH
+    if redis:
+        lsh = MinHashLSH(
+            threshold=threshold, num_perm=HASH_NUMPERM, storage_config={
+                'type': 'redis',
+                'basename': MINHASH_KEYPREF,
+                'redis': {'host': 'localhost', 'port': 6379},
+            }
+        )
+    else:
+        lsh = MinHashLSH(threshold=threshold, num_perm=HASH_NUMPERM)
+    return lsh
 
-
+def get_all_lsh_keys(lsh):
+    return {(b"_"+b'_'.join(k.split(b'_')[1:]).split(b'\x94')[0]).decode() for k in lsh.keys.keys()}
 
 
 def find_matches_by_hash(self, texts_iter=None, lsh=None, threshold=0.95, progress=True):
@@ -86,9 +125,7 @@ def find_matches_by_hash(self, texts_iter=None, lsh=None, threshold=0.95, progre
     if texts_iter is None: texts_iter = self.iter_texts_each()
     texts = []
     if lsh is None:
-        from datasketch import MinHashLSH
-        lsh = MinHashLSH(threshold=threshold, num_perm=128*2)
-        
+        lsh = get_lsh()
         for t in texts_iter:
             try:
                 minhash = t.minhash()

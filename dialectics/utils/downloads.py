@@ -1,5 +1,5 @@
 #print(__file__,'imported')
-from .utils import *
+from .misc import *
 import zipfile,tempfile,shutil
 
 
@@ -51,7 +51,7 @@ def download_file_tqdm(url, filename=False, dirname = ".", verbose = False, desc
             r.iter_content(chunk_size=chunk_size),
             total=num_bars,
             unit='KB',
-            desc = local_filename if not desc else desc,
+            desc = f'Downloading {os.path.basename(local_filename)}' if not desc else desc,
             leave = True
         )
         for chunk in iterr:

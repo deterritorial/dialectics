@@ -1,8 +1,8 @@
 #print(__file__,'imported')
-from totality.imports import *
-from totality.texts import BaseText
+from dialectics.imports import *
+from dialectics.texts import BaseText
+log = Log()
 
-CORPUS_CACHE={}
 def Corpus(id=TMP_CORPUS,_force=False,**kwargs):
     global CORPUS_CACHE
     if not id: return
@@ -104,15 +104,15 @@ class BaseCorpus(TextList):
 
 
     def init_from_file(self,as_text=True):
-        with Log('loading corpus from file') as log:
-            if not os.path.exists(self.path_metadata):
-                self.download_metadata()
-            if not os.path.exists(self.path_metadata):
-                log.error('No metadata file')
-                return
-            for d in readgen(self.path_metadata):
-                if self.col_id in d and d[self.col_id]:
-                    yield d
+        log('loading corpus from file')
+        if not os.path.exists(self.path_metadata):
+            self.download_metadata()
+        if not os.path.exists(self.path_metadata):
+            log.error('No metadata file')
+            return
+        for d in readgen(self.path_metadata):
+            if self.col_id in d and d[self.col_id]:
+                yield d
 
 
 
@@ -135,13 +135,13 @@ class BaseCorpus(TextList):
 
 
     def sync(self,**kwargs):
-        with Log(f'Syncing {self} into database') as log:
-            for i,d in enumerate(self.init_from_file()):
-                t=self.text(_i=i+1, _add=False, _load=False, _force=False, **d)
-                t.save()
+        if log: log(f'Syncing {self} into database')
+        for i,d in enumerate(self.init_from_file()):
+            t=self.text(_i=i+1, _add=False, _load=False, _force=False, **d)
+            t.save()
     
 
-
+    
 
     
     def sync_batch(self,batch_size=100,**kwargs):

@@ -1,5 +1,5 @@
 #print(__file__,'imported')
-from totality.imports import *
+from dialectics.imports import *
 
 class BaseObject(object):
     __COLLECTION__='obj'
@@ -47,4 +47,8 @@ class BaseObject(object):
         if url and opath:
             if force or not os.path.exists(opath):
                 download(url,opath)
+    
+    def download_txt(self,force=False):
+        url,opath=self.url_txt,self.path
+        if url and opath: download(url,opath)
     

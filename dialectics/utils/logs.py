@@ -1,5 +1,5 @@
 ##print(__file__,'imported')
-from totality.imports import *
+from dialectics.imports import *
 from loguru import logger
 import time
 LOGGER=None
@@ -15,13 +15,14 @@ class Logger():
             verbose=1,
             v=1,
             start=True,
-            # format="""[{time:HH:mm:ss.SSS}] {name}.<level>{function}</level>( <cyan>{message}</cyan> )""",
-            format="""[{time:HH:mm:ss.SSS}] <level>{message}</level>""",
+            format="""[{time:HH:mm:ss.SSS}] {name}.<level>{function}</level>( <cyan>{message}</cyan> )""",
+            format_info="""[{time:HH:mm:ss.SSS}] <level>{message}</level>""",
             fn_clear=True,
             fn_rotation="50MB",
             ):
         # set attrs
         self.format=format
+        self.format_info=format_info
         self.to_screen=to_screen
         self.id_screen=None
         self.id_info=None
@@ -77,7 +78,7 @@ class Logger():
             deltastr=deltastr.replace("milliseconds","ms")
             deltastr=deltastr.replace("nanoseconds","ms")
             msg=' ' + self.init_msg[0].lower() + self.init_msg[1:].split(':')[0] if self.init_msg else ''
-            if self.verbose>=self.init_verbose: self(f'Completed{msg} (+{deltastr})\n')# in {deltastr}')
+            # if self.verbose>=self.init_verbose: self(f'Completed{msg} (+{deltastr})\n')# in {deltastr}')
         if not self.to_screen: self.stop_screen()
     
     def start(self):
@@ -95,7 +96,7 @@ class Logger():
                 sys.stderr,
                 colorize=True,
                 level="INFO",
-                format="({time:HH:mm:ss.SSS}) [inter] <cyan>{message}</cyan>"
+                format=self.format_info
             )
 
     def start_screen(self):
@@ -107,13 +108,16 @@ class Logger():
     def stop_screen(self):
         if self.id_screen is not None:
             #logger.debug('removing sceen log')
-            logger.remove(self.id_screen)
+            try:
+                logger.remove(self.id_screen)
+            except ValueError:
+                pass
             self.id_screen = None
 
 
     def start_file(self):
         if self.id_file is None and self.fn:
-            from totality.utils import ensure_dir_exists,backup_fn,rmfn
+            from dialectics.utils import ensure_dir_exists,backup_fn,rmfn
             ensure_dir_exists(self.fn)
             if os.path.exists(self.fn): backup_fn(self.fn)
             rmfn(self.fn)
@@ -132,7 +136,7 @@ class Logger():
                 # rmfn(self.fn)
 
     def __getattr__(self,name):
-        from totality.utils import getattribute
+        from dialectics.utils import getattribute
         res = getattribute(self,name)
         if res is None: res = getattribute(self.logger,name)
         return res
