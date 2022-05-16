@@ -60,9 +60,9 @@ class BaseCorpus(TextList):
         
         # prob gonne have to make it
         if _load is None: _load = not d
+        meta['_corpus']=self.id
         t=self.text_class(
             id,             # text id within corpus
-            self.id,        # id if corpus
             **meta,
             _load=_load
         )
@@ -76,8 +76,11 @@ class BaseCorpus(TextList):
 
     def texts_iter(self):
         return iter(self.textd.values())
-    def texts(self):
-        return list(self.texts_iter())
+    def texts(self,progress=False):
+        iterr=list(self.texts_iter())
+        if progress: iterr=get_tqdm(iterr,desc=f'[{self.name}] Iterating texts')
+        return iterr
+    
     _texts=texts
     @property
     def tl(self): return self.texts()
@@ -122,16 +125,9 @@ class BaseCorpus(TextList):
         return self._text_collection
 
     def init_from_db(self,as_text=True,progress=True):
-        total=self.text_collection.count()
-        if total:
-            with Log('loading corpus from database') as log:
-                iterr=self.text_collection.find({'_corpus':self.id})
-                if progress: iterr=get_tqdm(iterr,total=self.text_collection.count())
-                for d in iterr:
-                    if self.col_id in d and d[self.col_id]:
-                            yield d
+        yield from Textspace().seek(_corpus=self.id,as_text=False)
 
-
+        
 
 
     def sync(self,**kwargs):

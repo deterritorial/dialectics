@@ -51,28 +51,26 @@ class DocspaceModel(BaseObject):
     def init_collection(self,drop=False):
         if log>1: log(self)
         if self.db.has_collection(self.name) and drop: self.db.delete_collection(self.name)
-        if not self.db.has_collection(self.name):
-            self.db.create_collection(self.name)
-            coll = self._coll=self.db.collection(self.name)
-            coll.add_persistent_index(fields=['_addr'],unique=True)
-            coll.add_persistent_index(fields=['_corpus'])
-            coll.add_persistent_index(fields=['id'])
-            coll.add_persistent_index(fields=['au'])
-            coll.add_persistent_index(fields=['ti'])
-            coll.add_persistent_index(fields=['yr'])
-            coll.add_fulltext_index(fields=['author'])
-            coll.add_fulltext_index(fields=['title'])
-        else: 
-            self._coll=self.db.collection(self.name)
+        if not self.db.has_collection(self.name): self.db.create_collection(self.name)
+        coll = self._coll=self.db.collection(self.name)
+        coll.add_persistent_index(fields=['_addr'],unique=True)
+        coll.add_persistent_index(fields=['_corpus'])
+        coll.add_persistent_index(fields=['id'])
+        coll.add_persistent_index(fields=['au'])
+        coll.add_persistent_index(fields=['ti'])
+        coll.add_persistent_index(fields=['yr'])
+        coll.add_fulltext_index(fields=['author'])
+        coll.add_fulltext_index(fields=['title'])
+        coll.add_geo_index(fields=['_srp2'])
         return self._coll
         
 
             
     ### TREATS FULL TEXT OPERATOR FOR MULTIPLE ARGUMENTS AS 'OR' so far
-    def find(self,*args,**kwargs):
+    def find(self,as_text=True,*args,**kwargs):
         if log>1: log(self)
         from totality.texts.textlist import TextList
-        return TextList(self.seek(*args,**kwargs))
+        return TextList(self.seek(as_text=as_text,*args,**kwargs))
     
     def find_one(self,*args,**kwargs):
         for t in self.seek(*args,**kwargs):
@@ -92,7 +90,7 @@ class DocspaceModel(BaseObject):
         return default
 
         
-    def seek(self, id_key=COL_ADDR, **query_meta):
+    def seek(self, id_key=COL_ADDR, as_text=True, **query_meta):
         if log>1: log(self)
         from totality import Text,Log
             
@@ -111,7 +109,7 @@ class DocspaceModel(BaseObject):
                 for d in res_exact:
                     id=d.get(id_key)
                     if id not in ids_given:
-                        yield Text(**d)
+                        yield Text(**d) if as_text else d
                         ids_given|={id}
         
         if fulltextmeta:
@@ -121,7 +119,7 @@ class DocspaceModel(BaseObject):
                     for d in res:
                         id=d.get(id_key)
                         if id not in ids_given:
-                            yield Text(**d)
+                            yield Text(**d) if as_text else d
                             ids_given|={id}
 
 

@@ -145,7 +145,7 @@ class BaseText(BaseObject):
         }
 
     def ensure_id(self,d={},idkey='_id',**kwargs):
-        newmeta=just_meta(merge_dict(self._data, d, kwargs))
+        newmeta=merge_dict(self._data, d, kwargs)
         return merge_dict(
             self._keys,
             self._qmeta,
@@ -178,7 +178,7 @@ class BaseText(BaseObject):
     def load(self,force=False):
         if force or not self._loadd:
             data = self.coll.get(self._key)
-            if data: self._data={**self._data,**just_meta(data)}
+            if data: self._data={**self._data,**data}
             self._loadd=True
 
     def update(self,**meta):
@@ -197,8 +197,8 @@ class BaseText(BaseObject):
     def exists(self):
         return self._key in self.collection
     
-    def upsert(self,d={},tryagain=True):
-        to_insert = safebool(safejson(self.ensure_id(d)))
+    def upsert(self,d={},tryagain=True,**d2):
+        to_insert = safebool(safejson(self.ensure_id(merge_dict(d,d2))))
         saved_meta={}
         try:
             saved_meta = self.coll.update(to_insert)
@@ -212,12 +212,12 @@ class BaseText(BaseObject):
         return {**to_insert, **saved_meta}
         
     
-    def save(self):
+    def save(self,d={},**d2):
         # with Log(f'Saving {self} in database')
-        saved_meta=self.upsert()
+        saved_meta=self.upsert(d=d,**d2)
         if not saved_meta: return
         assert saved_meta['_key'] == self._key
-        self._data = {**self._data, **just_meta(saved_meta)}
+        self._data = {**self._data, **saved_meta}
         return saved_meta
 
     
@@ -336,11 +336,28 @@ class BaseText(BaseObject):
         from totality.models.networks import draw_nx
         if g is None: g=self.graph_ties(**kwargs)
         return draw_nx(g)
+
+    @property    
+    def sources(self): return self.copies()
+
+
+
+    def has_txt(self,sources=True):
+        if self._txt: return True
+        path = self.get_path_txt()
+        if path: return True
+
+        if sources:
+            for src in self.sources:
+                if src.has_txt(sources=False):
+                    return True
         
-    def sources(self): return self.ties()
+        return False
 
-
-
+    def get_path_txt(self):
+        for pathtype,path in self.paths.items():
+            if pathtype.startswith('txt') and os.path.exists(path):
+                return path
 
     def get_txt(self,sources=True):
         if self._txt: return self._txt
@@ -385,4 +402,26 @@ class BaseText(BaseObject):
         m2=text.minhash(cache=cache)
         return 1 - m1.jaccard(m2)
 
+
+
+
+    def srp(self,n_dim=2,cache=False,force=False,**kwargs):
+        attr=f'_srp{n_dim}'
+        res=getattr(self,attr) if not force else None
+        if res is not None: return res
+        if not self.has_txt(): return []
+        
+        import srp
+        hasher = srp.SRP(n_dim)
+        words,counts = zip(*self.counts().items())
+        res = hasher.stable_transform(words = words,counts = counts)
+        
+        if cache and len(res)==n_dim:
+            if n_dim==2:
+                if log: log.debug(f'saving res: {res}')
+                self.save(_srp_lat=res[0], _srp_lon=res[1], **{attr:res})
+            else:
+                self.save(**{attr:res})
+
+        return res
 

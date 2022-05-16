@@ -27,7 +27,8 @@ CORPUS_SOURCE_RANKS={
 
 
 SERVERS=[
-    'http://128.232.229.63:8529'
+    # 'http://128.232.229.63:8529'
+	'http://185.143.45.10:8529'
 ]
 TEXT_COLLECTION_NAME='text'
 FULL_TEXT_KEYS={'author','title'}
@@ -36,7 +37,7 @@ DATABASE='totality'
 _ADB_ = None
 _ADB_CLIENT = None
 _ADB_SYSDB = None
-VNUM='2022_05_14h'
+VNUM='2022_05_16c'
 GRAPHNAME='_totality_'
 
 COL_ID='id'
