@@ -15,6 +15,17 @@ FROM_DEFAULT=['text']
 TO_DEFAULT=['text']
 MINHASH_KEYPREF=b'trWOR'
 
+
+
+CORPUS_SOURCE_RANKS={
+	'chadwyck':1,
+	'hathi':4,
+	'wikidata':7,
+	'chicago':3,
+	'markmark':2,
+}
+
+
 SERVERS=[
     'http://128.232.229.63:8529'
 ]
@@ -91,6 +102,7 @@ import tempfile,sys,shutil,os,random
 ## external
 import pandas as pd
 import numpy as np
+import networkx as nx
 import humanize
 
 

@@ -53,7 +53,7 @@ class TextList(BaseObject, UserList):
         if text_iter is None: text_iter = self.data_all
         self._data_uniq = sorted(
             list(self.iter_texts_uniq(self.data_all,**kwargs)),
-            key=lambda t: t.year
+            key=lambda t: t.yr
         )
         if log:
             log(f'data_all={len(self.data_all)}, _data_uniq={len(self._data_uniq)}')
@@ -76,21 +76,18 @@ class TextList(BaseObject, UserList):
             leave=True,
             **kwargs):
 
-        if False: #not force and self._data_uniq:
-            yield from self._data_uniq
-        else:
-            self._g = g = self.get_matchgraph() if (True or not self._g) else self._g
-            if log: log(f'<- matchgraph! = {g}')
-            if g and isinstance(g,nx.Graph):
-                cmps=list(nx.connected_components(g))
-                if 0: cmps=get_tqdm(cmps,desc=desc,leave=leave)
-                for i,nodeset in enumerate(cmps):
-                    nset=list(nodeset)
-                    nset.sort(key=lambda x: CORPUS_SOURCE_RANKS.get(to_corpus_and_id(x)[0],1000))
-                    t=Text(nset[0])
-                    if log: log(f'{i} {t}')
-                    if 0: cmps.set_description(f'{desc}: {t}')
-                    yield t
+        self._g = g = self.graph_ties() if (True or not self._g) else self._g
+        if log: log(f'<- matchgraph! = {g}')
+        if g and isinstance(g,nx.Graph):
+            cmps=list(nx.connected_components(g))
+            if 0: cmps=get_tqdm(cmps,desc=desc,leave=leave)
+            for i,nodeset in enumerate(cmps):
+                nset=list(nodeset)
+                nset.sort(key=lambda x: CORPUS_SOURCE_RANKS.get(to_corpus_and_id(x)[0],1000))
+                t=Text(nset[0])
+                if log: log(f'{i} {t}')
+                if 0: cmps.set_description(f'{desc}: {t}')
+                yield t
 
 
     def quiet(self): self.progress=False
@@ -118,20 +115,20 @@ class TextList(BaseObject, UserList):
         )
     map = run
                 
-    def graph_ties(self,node_name='addr'):
+    def graph_ties(self,node_repr='addr'):
         import networkx as nx
         g = nx.Graph()
         for t in get_tqdm(self.data_all):
-            tg=t.graph_ties()
+            tg=t.graph_ties(node_repr='addr')
             g = nx.compose(g,tg)
 
-        for node in list(g.nodes()):
-            if IDSEP_START+TMP_CORPUS_ID+IDSEP in node:
-                g.remove_node(node)
+        # # for node in list(g.nodes()):
+        # #     if IDSEP_START+TMP_CORPUS_ID+IDSEP in node:
+        # #         g.remove_node(node)
 
-        if node_name!='addr':
-            labeld=dict((addr,Text(addr).node) for addr in g.nodes())
-            nx.relabel_nodes(g,labeld,copy=False)
+        # if node_name!='addr':
+        #     labeld=dict((addr,Text(addr).node) for addr in g.nodes())
+        #     nx.relabel_nodes(g,labeld,copy=False)
         return g
         
 

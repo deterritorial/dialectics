@@ -72,7 +72,11 @@ class DocspaceModel(BaseObject):
     def find(self,*args,**kwargs):
         if log>1: log(self)
         from totality.texts.textlist import TextList
-        return TextList(self.look(*args,**kwargs))
+        return TextList(self.seek(*args,**kwargs))
+    
+    def find_one(self,*args,**kwargs):
+        for t in self.seek(*args,**kwargs):
+            return t
 
 
     def get(self,id,default=None):
@@ -88,7 +92,7 @@ class DocspaceModel(BaseObject):
         return default
 
         
-    def look(self, id_key=COL_ADDR, **query_meta):
+    def seek(self, id_key=COL_ADDR, **query_meta):
         if log>1: log(self)
         from totality import Text,Log
             

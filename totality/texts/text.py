@@ -94,7 +94,7 @@ class BaseText(BaseObject):
         return self.ensure_id(just_meta(self._data))
 
     @property
-    def meta(self): return just_meta_no_id(self._meta) #metadata()
+    def meta(self): return self.metadata() #just_meta_no_id(self._meta) #metadata()
     def metadata(self,sources=True,stamp_source=False,**kwargs):
         meta = OrderedSetDict()
         for k,v in just_meta_no_id(self._data).items(): meta[k]=v
@@ -166,7 +166,7 @@ class BaseText(BaseObject):
         if self.au:
             tl = self.tspace.find(au=self.au)
             mdf = tl.match(self)
-        return self.copies()
+        return self.copies(find_if_nec=False)
 
 
 
@@ -307,7 +307,7 @@ class BaseText(BaseObject):
         
         return weak_ties if not data else [(t,{}) for t in weak_ties]
 
-    def graph_ties(self,allow_tmp=False,**kwargs):
+    def graph_ties(self,allow_tmp=False, node_repr='nice', **kwargs):
         import networkx as nx
         g=nx.DiGraph()
         traversal_data = self.traverse_ties(**kwargs)
@@ -322,10 +322,14 @@ class BaseText(BaseObject):
                 if d1 and d2:
                     t1=Text(d1)
                     t2=Text(d2)
+                    if not hasattr(t1,node_repr) or not hasattr(t2,node_repr):
+                        log.error('??')
+                        continue
+
                     ts={t1,t2}-{self}
                     cs={tx._corpus for tx in ts}
                     if allow_tmp or not {TMP_CORPUS}&cs:
-                        g.add_edge(t1.nice, t2.nice, **edged)
+                        g.add_edge(getattr(t1,node_repr), getattr(t2,node_repr), **edged)
         return g
 
     def draw_ties(self,g=None,**kwargs):
