@@ -66,7 +66,7 @@ austen
 
 
 
-### Searching for texts
+### Creating new texts
 
 
 ```python
