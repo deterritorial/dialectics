@@ -73,20 +73,17 @@ austen
 # If I start a new text
 t = Text(title="Frankenstein", author="Shelley")
 t
-```
-
-
 
 
     Shelley, FRANKENSTEIN [_tmp/T37093] <eAaoX>
-
+```
 
 
 
 ```python
 # Retrieve metadata by querying existing database of known texts and corpora
 t.meta
-```
+
 
 
     [12:32:50.53] Relating texts:   0%|          | 0/44 [00:00<?, ?it/s]
@@ -157,7 +154,7 @@ t.meta
      'yr': [1818, 1831],
      'z_absval': [0.58, 0.66],
      'z_hardseed': [-1.32, -1.23]}
-
+```
 
 
 
@@ -165,8 +162,6 @@ t.meta
 # Draw the network of discovered copies/associated texts
 t.draw_ties()
 ```
-
-
     
 ![png](README_files/README_9_0.png)
     
@@ -176,23 +171,13 @@ t.draw_ties()
 ```python
 # From those discovered sources, get the plain txt
 t.txt[:100]
-```
-
-
-
 
     'The event on which this fiction is\nfounded has been supposed, by Dr.\nDarwin, and some of the physiol'
-
-
-
+```
 
 ```python
 # tokenize it...
 t.tokens()[:10]
-```
-
-
-
 
     ['the',
      'event',
@@ -204,7 +189,7 @@ t.tokens()[:10]
      'founded',
      'has',
      'been']
-
+```
 
 
 
@@ -212,10 +197,6 @@ t.tokens()[:10]
 # count words
 counts = t.counts()
 counts.most_common(10)
-```
-
-
-
 
     [('the', 4021),
      ('and', 2891),
@@ -227,7 +208,7 @@ counts.most_common(10)
      ('in', 1069),
      ('that', 1024),
      ('was', 984)]
-
+```
 
 
 
