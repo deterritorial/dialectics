@@ -1,5 +1,5 @@
 #print(__file__,'imported')
-from txtuality.imports import *
+from intertxt.imports import *
 from .baseobj import BaseObject
 log = Log()
 
@@ -72,7 +72,7 @@ class DocspaceModel(BaseObject):
     ### TREATS FULL TEXT OPERATOR FOR MULTIPLE ARGUMENTS AS 'OR' so far
     def find(self,as_text=True,*args,**kwargs):
         if log>1: log(self)
-        from txtuality.texts.textlist import TextList
+        from intertxt.texts.textlist import TextList
         return TextList(self.seek(as_text=as_text,*args,**kwargs))
     
     def find_one(self,*args,**kwargs):
@@ -81,7 +81,7 @@ class DocspaceModel(BaseObject):
 
 
     def get(self,id,default=None):
-        from txtuality.texts import Text
+        from intertxt.texts import Text
         from .relspace import Relspace
 
         if id in TEXT_CACHE: return TEXT_CACHE[id]
@@ -95,7 +95,7 @@ class DocspaceModel(BaseObject):
         
     def seek(self, id_key=COL_ADDR, as_text=True, **query_meta):
         if log>1: log(self)
-        from txtuality import Text,Log
+        from intertxt import Text,Log
             
         # prime
         if not self.coll: return

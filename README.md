@@ -1,10 +1,10 @@
-# txtuality
+# intertxt
 
 Code, data, and models to examine cultural production. Rooted in the digital humanities, the package assists in corpus management, text analysis, and machine learning.
 
 Install: 
 ```
-pip install txtuality
+pip install intertxt
 ```
 
 ## Texts
@@ -12,7 +12,7 @@ pip install txtuality
 
 ```python
 # import
-from txtuality import Text
+from intertxt import Text
 ```
 
 ### Finding existing texts

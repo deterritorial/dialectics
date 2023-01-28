@@ -1,4 +1,4 @@
-from txtuality.models import *
+from intertxt.models import *
 
 def run_match_by_title(*x,**y):
     print(f'run_match_by_title({x},{y})')

@@ -7,7 +7,7 @@ from pathlib import Path
 
 TMP_CORPUS='tmp'
 PATH_USER_HOME = str(Path.home())
-PATH_HOME = os.path.join(PATH_USER_HOME,'txtuality')
+PATH_HOME = os.path.join(PATH_USER_HOME,'intertxt')
 PATH_DATA = os.path.join(PATH_HOME,'data')
 PATH_CONFIG = os.path.join(PATH_HOME,'config')
 PATH_CORPORA = os.path.join(PATH_HOME,'corpora')
@@ -38,12 +38,12 @@ SERVERS=[
 TEXT_COLLECTION_NAME='text'
 FULL_TEXT_KEYS={'author','title'}
 
-DATABASE='txtuality'
+DATABASE='intertxt'
 _ADB_ = None
 _ADB_CLIENT = None
 _ADB_SYSDB = None
-VNUM='2022_05_16c'
-GRAPHNAME='_txtuality_'
+VNUM='2023_01_28'
+GRAPHNAME='_intertxt_'
 
 COL_ID='id'
 COL_ADDR='_addr'
@@ -114,11 +114,11 @@ import humanize
 
 
 ## me
-from txtuality.utils.logs import *
+from intertxt.utils.logs import *
 with Log('booting'):
-	from txtuality.utils import *
-	from txtuality.database import *
-	from txtuality.texts import *
-	from txtuality.corpora import *
-	from txtuality.models import *
+	from intertxt.utils import *
+	from intertxt.database import *
+	from intertxt.texts import *
+	from intertxt.corpora import *
+	from intertxt.models import *
 

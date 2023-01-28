@@ -1,5 +1,5 @@
 #print(__file__,'imported')
-from txtuality.imports import *
+from intertxt.imports import *
 
 class BaseObject(object):
     __COLLECTION__='obj'

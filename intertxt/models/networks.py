@@ -1,4 +1,4 @@
-from txtuality.imports import *
+from intertxt.imports import *
 import networkx as nx
 
 

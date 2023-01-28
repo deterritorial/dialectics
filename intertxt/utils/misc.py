@@ -13,12 +13,12 @@ def is_valid_text_obj(obj):
     return is_text_obj(obj) and obj.id_is_valid()
 
 def is_text_obj(obj):
-    from txtuality.texts import BaseText
+    from intertxt.texts import BaseText
     if issubclass(type(obj), BaseText): return True
     return False
 
 def is_corpus_obj(obj): 
-    from txtuality.corpora import BaseCorpus
+    from intertxt.corpora import BaseCorpus
     return issubclass(type(obj), BaseCorpus)
 
 
@@ -225,7 +225,7 @@ def is_iterable(v):
 
 
 def setup():
-    from txtuality import log,PATH_HOME,PATH_DATA,PATH_CONFIG,PATH_CORPORA
+    from intertxt import log,PATH_HOME,PATH_DATA,PATH_CONFIG,PATH_CORPORA
     # create paths
     for path in [PATH_HOME,PATH_DATA,PATH_CONFIG,PATH_CORPORA]:
         if not os.path.exists(path):
@@ -409,7 +409,7 @@ def to_shorttitle(title,
 
 
 def get_addr_str(text=None,corpus=None,source=None,**kwargs):
-    from txtuality.corpora import Corpus
+    from intertxt.corpora import Corpus
     corpus=Corpus(corpus)
 
     # rescue via source?
@@ -612,7 +612,7 @@ def get_idx(
         force_meta=True,
         **meta):
     
-    from txtuality import log
+    from intertxt import log
     if is_text_obj(id): return id.id
     id1=id
     if log>1: log(f'<- id = {id}, i = {i}')
