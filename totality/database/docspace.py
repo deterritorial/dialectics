@@ -5,15 +5,18 @@ log = Log()
 
 
 class DocspaceModel(BaseObject):
+    NAME=TEXT_COLLECTION_NAME
+    DBNAME=DATABASE+'_'+VNUM
+
     def __init__(self,
-            name=TEXT_COLLECTION_NAME,
-            dbname=DATABASE+'_'+VNUM,
+            name=None,
+            dbname=None,
             _client=None,
             _db=None,
             _coll=None,
             ):
-        self.name=name
-        self.dbname=dbname
+        self.name=name if name else self.NAME
+        self.dbname=dbname if dbname else self.DBNAME
         self._client=None
         self._db=None
         self._coll=None
@@ -43,9 +46,9 @@ class DocspaceModel(BaseObject):
         if force or self._db is None:
             from arango import ArangoClient
             self._client = ArangoClient(hosts=','.join(SERVERS))
-            self._sysdb  = self._client.db('_system', username='root', password='passwd')
+            self._sysdb  = self._client.db('_system') #, username='root', password='passwd')
             if not self._sysdb.has_database(self.dbname): self._sysdb.create_database(self.dbname)
-            self._db = self._client.db(self.dbname, username='root', password='passwd')
+            self._db = self._client.db(self.dbname) #, username='root', password='passwd')
         return self.db
 
     def init_collection(self,drop=False):
@@ -138,3 +141,17 @@ def Docspace(name, dbname=f"{DATABASE}_{VNUM}", force=False, _class=DocspaceMode
 def Textspace(force=False, **kwargs):
     return Docspace(TEXT_COLLECTION_NAME, **kwargs)
 
+
+
+
+
+class SRPModel(DocspaceModel):
+    NAME='srp'
+
+    def init_collection(self,drop=False):
+        if log>0: log(self)
+        if self.db.has_collection(self.name) and drop: self.db.delete_collection(self.name)
+        if not self.db.has_collection(self.name): self.db.create_collection(self.name)
+        coll = self._coll=self.db.collection(self.name)
+        coll.add_persistent_index(fields=['_addr'],unique=True)
+        return self._coll

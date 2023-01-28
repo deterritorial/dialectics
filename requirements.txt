@@ -6,3 +6,5 @@ numpy
 loguru
 python-arango
 csvloader
+networkx
+orjson

@@ -381,8 +381,8 @@ class BaseText(BaseObject):
         txt=self.get_txt(sources=sources)
         return tokenizer(txt.lower() if lower else txt)
 
-    def counts(self,tokens=None,**kwargs):
-        if not tokens: tokens=self.tokens(**kwargs)
+    def counts(self,tokens=None,sources=True,**kwargs):
+        if not tokens: tokens=self.tokens(sources=sources,**kwargs)
         return Counter(tokens)
 
 
@@ -405,23 +405,23 @@ class BaseText(BaseObject):
 
 
 
-    def srp(self,n_dim=2,cache=False,force=False,**kwargs):
-        attr=f'_srp{n_dim}'
-        res=getattr(self,attr) if not force else None
-        if res is not None: return res
-        if not self.has_txt(): return []
+    def srp(self,n_dim=640,cache=False,force=False,sources=False,**kwargs):
+        # attr=f'_srp{n_dim}'
+        # res=getattr(self,attr) if not force else None
+        # if res is not None: return res
+        if not self.has_txt(sources=sources): return []
         
         import srp
         hasher = srp.SRP(n_dim)
-        words,counts = zip(*self.counts().items())
+        words,counts = zip(*self.counts(sources=sources).items())
         res = hasher.stable_transform(words = words,counts = counts)
         
-        if cache and len(res)==n_dim:
-            if n_dim==2:
-                if log: log.debug(f'saving res: {res}')
-                self.save(_srp_lat=res[0], _srp_lon=res[1], **{attr:res})
-            else:
-                self.save(**{attr:res})
+        # if cache and len(res)==n_dim:
+        #     if n_dim==2:
+        #         if log: log.debug(f'saving res: {res}')
+        #         self.save(_srp_lat=res[0], _srp_lon=res[1], **{attr:res})
+        #     else:
+        #         self.save(**{attr:res})
 
         return res
 

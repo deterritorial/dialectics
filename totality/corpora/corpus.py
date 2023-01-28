@@ -113,7 +113,7 @@ class BaseCorpus(TextList):
         if not os.path.exists(self.path_metadata):
             log.error('No metadata file')
             return
-        for d in readgen(self.path_metadata):
+        for d in readgen(self.path_metadata,desc=f'[{self.name}] Reading metadata file'):
             if self.col_id in d and d[self.col_id]:
                 yield d
 
@@ -133,6 +133,7 @@ class BaseCorpus(TextList):
     def sync(self,**kwargs):
         if log: log(f'Syncing {self} into database')
         for i,d in enumerate(self.init_from_file()):
+            d={str(k):v for k,v in d.items()}
             t=self.text(_i=i+1, _add=False, _load=False, _force=False, **d)
             t.save()
     

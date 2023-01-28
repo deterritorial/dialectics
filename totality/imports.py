@@ -1,3 +1,6 @@
+ARANGO_UN='root'
+ARANGO_PW='passwd'
+
 #print(__file__,'imported')
 import os,sys
 from pathlib import Path
@@ -28,7 +31,9 @@ CORPUS_SOURCE_RANKS={
 
 SERVERS=[
     # 'http://128.232.229.63:8529'
-	'http://185.143.45.10:8529'
+	# 'http://185.143.45.10:8529'
+	'http://127.0.0.1:8529'
+	# 'http://0.0.0.0:8529'
 ]
 TEXT_COLLECTION_NAME='text'
 FULL_TEXT_KEYS={'author','title'}
