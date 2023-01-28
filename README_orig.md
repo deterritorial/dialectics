@@ -1,17 +1,17 @@
-# totality
+# txtuality
 
-Code, data, and models to examine cultural production in its essential aspect as a totality. Rooted in the digital humanities, the package assists in corpus management, text analysis, and machine learning and AI. It is increasingly developing methods of synthesisizing knowledge, pooling data, and creating shared ontologies.
+Code, data, and models to examine cultural production in its essential aspect as a txtuality. Rooted in the digital humanities, the package assists in corpus management, text analysis, and machine learning and AI. It is increasingly developing methods of synthesisizing knowledge, pooling data, and creating shared ontologies.
 
 Just install:
 
 ```
-pip install totality
+pip install txtuality
 ```
 
 Then:
 
 ```python
-In [1]: from totality import Text
+In [1]: from txtuality import Text
 
 In [2]: texts = Text.find(author="Jane Austen")
 

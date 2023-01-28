@@ -1,5 +1,5 @@
 #print(__file__,'imported')
-from totality.imports import *
+from txtuality.imports import *
 log = Log()
 
 
@@ -7,7 +7,7 @@ log = Log()
 
 def Text(id=None, _corpus=None, _force=False, **kwargs):
     global TEXT_CACHE
-    from totality.corpora import Corpus
+    from txtuality.corpora import Corpus
 
     if not _corpus and is_text_obj(id): return id
     
@@ -131,7 +131,7 @@ class BaseText(BaseObject):
     @property
     def corpus(self):
         if self._corpusobj is not None:
-            from totality.corpora import Corpus
+            from txtuality.corpora import Corpus
             self._corpusobj=Corpus(self._corpus) 
         return self._corpusobj
     
@@ -230,7 +230,7 @@ class BaseText(BaseObject):
 
 
     def relate(self,other,rel=MATCHRELNAME,rel_type='',yn='',**kwargs):
-        from totality.database import Relspace
+        from txtuality.database import Relspace
         other = Text(other)
         return Relspace().link(self,other,rel=rel,rel_type=rel_type,yn=yn,**just_meta_no_id(kwargs))
     
@@ -333,7 +333,7 @@ class BaseText(BaseObject):
         return g
 
     def draw_ties(self,g=None,**kwargs):
-        from totality.models.networks import draw_nx
+        from txtuality.models.networks import draw_nx
         if g is None: g=self.graph_ties(**kwargs)
         return draw_nx(g)
 

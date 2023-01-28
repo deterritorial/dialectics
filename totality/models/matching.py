@@ -1,4 +1,4 @@
-from totality.models import *
+from txtuality.models import *
 
 def run_match_by_title(*x,**y):
     print(f'run_match_by_title({x},{y})')

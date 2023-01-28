@@ -1,6 +1,6 @@
 #print(__file__,'imported')
-from totality.imports import *
-from totality.texts import BaseText
+from txtuality.imports import *
+from txtuality.texts import BaseText
 log = Log()
 
 def Corpus(id=TMP_CORPUS,_force=False,**kwargs):

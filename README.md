@@ -1,10 +1,10 @@
-# totality
+# txtuality
 
-Code, data, and models to examine cultural production in its essential aspect as a totality. Rooted in the digital humanities, the package assists in corpus management, text analysis, and machine learning and AI. It is increasingly developing methods of synthesisizing knowledge, pooling data, and creating shared ontologies.
+Code, data, and models to examine cultural production. Rooted in the digital humanities, the package assists in corpus management, text analysis, and machine learning.
 
 Install: 
 ```
-pip install totality
+pip install txtuality
 ```
 
 ## Texts
@@ -12,7 +12,7 @@ pip install totality
 
 ```python
 # import
-from totality import Text
+from txtuality import Text
 ```
 
 ### Finding existing texts

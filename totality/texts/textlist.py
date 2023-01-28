@@ -1,4 +1,4 @@
-from totality.imports import *
+from txtuality.imports import *
 from collections import UserList
 from .text import Text
 
@@ -133,7 +133,7 @@ class TextList(BaseObject, UserList):
         
 
     def matchgraph(self,draw=True,node_name='node',**kwargs):
-        from totality.models.networks import draw_nx
+        from txtuality.models.networks import draw_nx
         g=self.get_matchgraph(node_name=node_name)
         return g if g is None or not draw else draw_nx(g)
 
@@ -157,7 +157,7 @@ class TextList(BaseObject, UserList):
         return df
 
     def match(self, *texts,rel=MATCHRELNAME,_progress=True,**kwargs):
-        from totality.models.matching import match_by_title
+        from txtuality.models.matching import match_by_title
 
         inpdf = self.get_titlematch_input_df()
         inpdf2 = None if not texts else self.get_titlematch_input_df(text_iter=texts)
@@ -186,7 +186,7 @@ class TextList(BaseObject, UserList):
         return slices(data,n=n)
 
     def into_lsh(self,progress=True,batch_n=10):
-        from totality.models.matching import get_lsh,get_all_lsh_keys
+        from txtuality.models.matching import get_lsh,get_all_lsh_keys
         lsh = get_lsh()
         lshkeys = get_all_lsh_keys(lsh)
         texts = [t for t in self if t.addr not in lshkeys]
@@ -203,7 +203,7 @@ class TextList(BaseObject, UserList):
         
     
     def match_by_hash(self,progress=True):
-        from totality.models.matching import get_lsh
+        from txtuality.models.matching import get_lsh
         lsh = get_lsh()
         iterr=self
         if progress: iterr=get_tqdm(iterr,desc='Finding matches')

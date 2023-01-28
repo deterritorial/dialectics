@@ -1,3 +1,3 @@
 #print(__file__,'imported')
-from totality.imports import *
-from .totality import *
+from txtuality.imports import *
+from .txtuality import *

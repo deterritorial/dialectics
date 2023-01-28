@@ -7,7 +7,7 @@ from pathlib import Path
 
 TMP_CORPUS='tmp'
 PATH_USER_HOME = str(Path.home())
-PATH_HOME = os.path.join(PATH_USER_HOME,'totality')
+PATH_HOME = os.path.join(PATH_USER_HOME,'txtuality')
 PATH_DATA = os.path.join(PATH_HOME,'data')
 PATH_CONFIG = os.path.join(PATH_HOME,'config')
 PATH_CORPORA = os.path.join(PATH_HOME,'corpora')
@@ -38,12 +38,12 @@ SERVERS=[
 TEXT_COLLECTION_NAME='text'
 FULL_TEXT_KEYS={'author','title'}
 
-DATABASE='totality'
+DATABASE='txtuality'
 _ADB_ = None
 _ADB_CLIENT = None
 _ADB_SYSDB = None
 VNUM='2022_05_16c'
-GRAPHNAME='_totality_'
+GRAPHNAME='_txtuality_'
 
 COL_ID='id'
 COL_ADDR='_addr'
@@ -114,11 +114,11 @@ import humanize
 
 
 ## me
-from totality.utils.logs import *
+from txtuality.utils.logs import *
 with Log('booting'):
-	from totality.utils import *
-	from totality.database import *
-	from totality.texts import *
-	from totality.corpora import *
-	from totality.models import *
+	from txtuality.utils import *
+	from txtuality.database import *
+	from txtuality.texts import *
+	from txtuality.corpora import *
+	from txtuality.models import *
 

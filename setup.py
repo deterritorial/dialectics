@@ -7,12 +7,12 @@ with open("requirements.txt", "r", encoding='utf-8', errors='ignore') as fh:
     requirements = [x.strip() for x in fh.read().split('\n') if x.strip()]
 
 setup(
-    name='totality',
+    name='txtuality',
     version='0.0.6',
-    url='https://github.com/deterritorial/totality.git',
+    url='https://github.com/deterritorial/txtuality.git',
     author='Ryan Heuser',
     author_email='rj416@cam.ac.uk',
-    description='Code, data, and models to examine cultural production in its essential aspect as a totality. Rooted in the digital humanities, the package assists in corpus management, text analysis, and machine learning and AI. It is increasingly developing methods of synthesisizing knowledge, pooling data, and creating shared ontologies.',
+    description='Code, data, and models to examine cultural production in its essential aspect as a txtuality. Rooted in the digital humanities, the package assists in corpus management, text analysis, and machine learning and AI. It is increasingly developing methods of synthesisizing knowledge, pooling data, and creating shared ontologies.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     

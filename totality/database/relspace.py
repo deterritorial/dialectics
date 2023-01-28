@@ -1,5 +1,5 @@
 from lib2to3.pytree import Base
-from totality.imports import *
+from txtuality.imports import *
 from .docspace import DocspaceModel
 log=Log()
 from arango import DocumentInsertError
@@ -73,7 +73,7 @@ class RelspaceModel(DocspaceModel):
 
 
     def link(self,id1,id2,d1={},**d2):
-        from totality.texts import Text
+        from txtuality.texts import Text
         log('linking texts')
         t1,t2=Text(id1),Text(id2)
 

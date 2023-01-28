@@ -5,7 +5,7 @@
 
 
 import sys; sys.path.insert(0,'../..')
-from totality import Text,log,Corpus
+from txtuality import Text,log,Corpus
 log.off()
 N_DIM=640
 
@@ -13,7 +13,7 @@ N_DIM=640
 # In[2]:
 
 
-from totality import *
+from txtuality import *
 class SRPModel(DocspaceModel):
     NAME='srp'
 
@@ -63,7 +63,7 @@ sm.coll.get(t._key)
 # In[12]:
 
 
-from totality import Corpus
+from txtuality import Corpus
 for t in Corpus('chadwyck').texts(progress=True):
     t.srp(num_dim=2, cache=True, force=True)
 
@@ -85,7 +85,7 @@ array
 # In[9]:
 
 
-from totality import Textspace
+from txtuality import Textspace
 Textspace().coll.find_near(float(array[0]), float(array[1]))
 
 

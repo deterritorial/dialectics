@@ -1,5 +1,5 @@
 #print(__file__,'imported')
-from totality.imports import *
+from txtuality.imports import *
 
 class BaseObject(object):
     __COLLECTION__='obj'

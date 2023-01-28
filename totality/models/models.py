@@ -1,1 +1,1 @@
-from totality.imports import *
+from txtuality.imports import *

@@ -1,4 +1,4 @@
-from totality.imports import *
+from txtuality.imports import *
 import networkx as nx
 
 
